@@ -26,6 +26,34 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   create() {
+    //// Animations
+    // Upgrades
+    this.anims.create({
+      key: 'katana_attack',
+      frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 4 }),
+      frameRate: 10,
+      hideOnComplete: true
+    });
+
+    // Chars
+    this.anims.create({
+      key: 'left',
+      frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1
+    });
+    this.anims.create({
+        key: 'turn',
+        frames: [ { key: 'dude', frame: 4 } ],
+        frameRate: 20
+    });
+    this.anims.create({
+        key: 'right',
+        frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
     this.scene.start('MainScene')
 
     /**

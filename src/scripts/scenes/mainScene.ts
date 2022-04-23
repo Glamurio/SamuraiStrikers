@@ -1,9 +1,10 @@
 // import PhaserLogo from '../objects/phaserLogo'
 // import FpsText from '../objects/fpsText'
-import Unit from '../objects/unit'
+import { Unit } from '../objects/unit'
 import Player from '../objects/player'
-import Enemy from '../objects/enemy'
+import { EnemyPool } from '../objects/enemy'
 import Effect from '../objects/effect'
+import { Weapon } from '../objects/weapon'
 
 export default class MainScene extends Phaser.Scene {
   fpsText
@@ -12,10 +13,11 @@ export default class MainScene extends Phaser.Scene {
   music?: Phaser.Sound.HTML5AudioSound
   platforms?: Phaser.GameObjects.Group
   player?: Player
-  enemies?: Phaser.GameObjects.Group
-  enemy?: Enemy
+  playerWeapons?: Array<Weapon>
+  enemies?: EnemyPool
   effects?: Phaser.GameObjects.Group
   slash?: Effect
+  timer: number = 0
 
   constructor() {
     super({ key: 'MainScene' })
@@ -44,130 +46,177 @@ export default class MainScene extends Phaser.Scene {
     this.platforms.create(750, 220, 'ground');
 
     // Player
-    this.player = new Player(this, 100, 450, 'dude', 0)
+    const playerConfig = { damage: 1, health: 2 }
+    this.player = new Player(this, 100, 450, 'dude', playerConfig)
     this.player.setCollideWorldBounds(true);
-
-    this.anims.create({
-        key: 'left',
-        frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    this.anims.create({
-        key: 'turn',
-        frames: [ { key: 'dude', frame: 4 } ],
-        frameRate: 20
-    });
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
-        frameRate: 10,
-        repeat: -1
-    });
 
     // new PhaserLogo(this, this.cameras.main.width / 2, 0)
     // this.fpsText = new FpsText(this)
 
     // Enemies
-    this.enemies = this.physics.add.group({
-      classType: Enemy
-    });
-
-		this.enemies.children.each(child => {
-			const enemy = child as Enemy
-			enemy.setTarget(this.player!)
+    this.enemies = this.add.existing(new EnemyPool(this))
+    this.time.addEvent({
+			delay: 1000,
+			loop: true,
+			callback: () => {
+				this.spawnEnemy('bomb', 2, 1)
+			}
 		})
 
-    // Effects
+    // Upgrades
     this.effects = this.physics.add.group();
-    this.anims.create({
-      key: 'slash_attack',
-      frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 4 }),
-      frameRate: 10,
-      hideOnComplete: true
-    });
-    this.slash = new Effect(this, 100, 450, 'effects_slash', 0)
-    this.slash.visible = false;
+
+    const katanaConfig = { damage: 1 }
+    this.player.addUpgrade(new Weapon('weapon_katana', this.player, this))
 
     // Physics
     this.physics.add.collider(this.player, this.platforms);
     // this.physics.add.collider(this.stars, this.platforms);
     this.physics.add.collider(this.enemies, this.platforms);
     this.physics.add.collider(this.enemies, this.enemies);
-    this.physics.add.overlap(this.slash, this.enemies, this.handleDamage, undefined, this);
 
-    // this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
-    // this.physics.add.collider(this.player, this.bombs, this.hitBomb, null, this);
+    this.playerWeapons = this.player.getWeapons()
+    for (let i in this.playerWeapons) {
+      // Iterate over each Upgrade to get the effect
+      const effect = this.playerWeapons[i].getEffect()!
+      this.physics.add.overlap(
+        effect,
+        this.enemies,
+        this.handleCollision,
+        this.checkCollision,
+        this
+      );
+      this.time.addEvent({
+        delay: 2000,
+        loop: true,
+        callback: () => {
+          this.handleAttack(effect)
+        }
+      })
+    }
   }
 
   update() {
-    // for (var i = 0; i < length; i++) {
-    //   const width = parseInt(this.game.config.width.toString())
-    //   const height = parseInt(this.game.config.height.toString())
-    //   let enemy = new Enemy(this, Phaser.Math.Between(0, width), Phaser.Math.Between(0, height), 'bomb');
-    //   this.physics.add.existing(enemy);
-    // }
-
-    // random positioned zombie
-		this.enemies!.get(
-			Phaser.Math.Between(100, 700),
-			Phaser.Math.Between(100, 500),
-			'bomb'
-		)
+    // Count frames
+    this.timer++
 
     // this.fpsText.update()
     this.player!.setVelocity(0);
 
     // Controls
     this.handleControls();
-
-    this.enemies!.children.each(child => {
-			const enemy = child as Enemy
-      this.followTarget(enemy, 100);
+    
+    // Enemy
+    this.enemies!.children.each((child) => {
+      const unit = child as Unit
+      this.followTarget(unit as Unit, 75);
+      this.handleDeath(unit)
 		})
 
-    this.slash!.setPosition(this.player!.x, this.player!.y-40);
+    // Update effect positions
+    for (let i in this.playerWeapons) {
+      const weapon = this.playerWeapons[i]
+      const effect = weapon.getEffect()
+      effect.setPosition(this.player!.x, this.player!.y-40);
+      effect.on('animationcomplete', () => weapon.clearTargets());
+    }
+  }
+
+  spawnEnemy(type: string, health:number, damage:number) {
+    const enemyConfig = { damage: damage, health: health, target: this.player }
+
+    if (!this.enemies) {
+			return
+		}
+
+		if (this.enemies.countActive(true) >= 10) {
+			return
+		}
+
+		const enemy = this.enemies.spawn(
+      Phaser.Math.Between(100, 700),
+      Phaser.Math.Between(100, 500),
+      type, enemyConfig
+    )
+
+		if (!enemy) {
+			return
+		}
+
+		// enemy.setInteractive()
+		// 	.on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, pointer => {
+		// 		this.enemies!.despawn(enemy)
+		// 	})
+
+		return enemy
   }
 
   handleControls() {
     if (this.arrow_keys.left.isDown) {
-        this.player!.setVelocityX(-300);
+        this.player!.setVelocityX(-150);
         this.player!.anims.play('left', true);
     }
     else if (this.arrow_keys.right.isDown) {
-        this.player!.setVelocityX(300);
+        this.player!.setVelocityX(150);
         this.player!.anims.play('right', true);
     } else {
         this.player!.anims.play('turn', true);
     }
 
     if (this.arrow_keys.up.isDown) {
-        this.player!.setVelocityY(-300);
+        this.player!.setVelocityY(-150);
         this.player!.anims.play('left', true);
     } else if (this.arrow_keys.down.isDown) {
-        this.player!.setVelocityY(300);
+        this.player!.setVelocityY(150);
         this.player!.anims.play('right', true);
     }
-
-    if (this.attack_btn.isDown) {
-      this.handleAttack()
-    }
   }
-
-  handleDamage(effect, entity) {
+  
+  checkCollision(effect, unit) {
+    effect = effect as Effect
+    unit = unit as Unit
     if (effect.visible) {
-      entity.destroy();
+      const weapon = effect.owner as Weapon
+      const targets = weapon.getTargets()
+
+      // Ensure the unit has not been recently damaged
+      if (!targets.includes(unit)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  handleCollision(effect: any, unit: any) {
+    effect = effect as Effect
+    unit = unit as Unit
+    const weapon = effect.owner as Weapon
+    this.dealDamage(unit, weapon.getDamage())
+    weapon.addTarget(unit)
+  }
+
+  handleDeath(unit: Unit) {
+    if (unit.getHealth() <= 0) {
+      this.enemies!.despawn(unit)
     }
   }
 
-  handleAttack() {
-    this.slash!.visible = true;
-    this.slash!.anims.play('slash_attack');
+  handleAttack(effect: Effect) {
+    effect.visible = true;
+    effect.anims.play(effect.getAnimation());
   }
 
-  followTarget( object: Unit, velocity:number = 1) {
-    if (object.scene && object.target ) {
-      this.physics.moveToObject(object, object.target, velocity);
+  dealDamage(target: Unit, damage: number) {
+    let health = target.getHealth()
+    target.setHealth(health-damage)
+  }
+
+  followTarget(object: Unit, velocity: number = 1) {
+    if (object && object.scene) {
+      const target = object.getTarget()
+      if (target) {
+        this.physics.moveToObject(object, target, velocity);
+      }
     }
   }
 }
