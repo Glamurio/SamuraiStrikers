@@ -20,7 +20,6 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   private moveSpeed: number
   
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string, config: UnitOptions ) {
-      
     super(scene, x, y, texture)
     scene.add.existing(this)
 		scene.physics.add.existing(this)

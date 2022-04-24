@@ -3,22 +3,29 @@ import Player from '../objects/player'
 import { Enemy, EnemyPool } from '../objects/enemy'
 import Effect from '../objects/effect'
 import { Weapon } from '../objects/weapon'
-import { isEffect, isPlayer, isUnit } from '../utilities'
+import { isEffect, isPickup, isPlayer, isUnit } from '../utilities'
+import { Pickup, PickupPool } from '../objects/pickup'
 
 export default class MainScene extends Phaser.Scene {
+  // Game
   gameOver: boolean = false
   music?: Phaser.Sound.HTML5AudioSound
   platforms?: Phaser.GameObjects.Group
+  layer: Phaser.Tilemaps.TilemapLayer
+
+  // Player
   player: Player
   playerWeapons?: Array<Weapon>
-  enemies?: EnemyPool
-  slash?: Effect
+  playerCircle: Phaser.Geom.Circle
+  aimRotation: number
+
+  // Misc
+  enemies: EnemyPool
+  pickups: PickupPool
   timer: number = 0
-  background: Phaser.GameObjects.Image
-  layer: Phaser.Tilemaps.TilemapLayer
-  angle: number
 
   // Controls
+  mouse: Phaser.Input.Pointer
   arrowKeys: Phaser.Types.Input.Keyboard.CursorKeys
   escapeKey: Phaser.Input.Keyboard.Key
   keyA: Phaser.Input.Keyboard.Key
@@ -33,6 +40,7 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     // Set controls
+    this.mouse = this.input.mousePointer
     this.arrowKeys = this.input.keyboard.createCursorKeys();
     this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -64,6 +72,7 @@ export default class MainScene extends Phaser.Scene {
       { index: 7, weight: 1 },
     ]
     this.layer = map.createBlankLayer('layer1', tiles);
+    this.layer.setDepth(0)
     this.layer.weightedRandomize(weightConfig)
 
     this.platforms = this.physics.add.staticGroup();
@@ -80,13 +89,12 @@ export default class MainScene extends Phaser.Scene {
     const screenCenterY = this.cameras.main.worldView.y + this.cameras.main.height / 2;
     this.player = new Player(this, screenCenterX, screenCenterY, 'dude', playerConfig)
     this.player.setCollideWorldBounds(false);
+    this.player.setDepth(2)
     this.cameras.main.startFollow(this.player);
-
-    // new PhaserLogo(this, this.cameras.main.width / 2, 0)
-    // this.fpsText = new FpsText(this)
 
     // Enemies
     this.enemies = this.add.existing(new EnemyPool(this))
+    this.enemies.setDepth(2)
     this.time.addEvent({
 			delay: 200,
 			loop: true,
@@ -95,6 +103,10 @@ export default class MainScene extends Phaser.Scene {
 			}
 		})
 
+    // Pickups
+    this.pickups = this.add.existing(new PickupPool(this))
+    this.pickups.setDepth(1)
+
     // Items
     this.player.addItem(new Weapon('weapon_katana', this.player, this))
 
@@ -102,20 +114,15 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.platforms);
     this.physics.add.collider(this.enemies, this.platforms);
     this.physics.add.collider(this.enemies, this.enemies);
-    this.physics.add.overlap(this.player, this.enemies, this.handleCollision, this.checkCollision);
+    this.physics.add.overlap(this.player, this.pickups, this.handleCollision, this.checkCollision, this);
+    // this.physics.add.overlap(this.player, this.enemies, this.handleCollision, this.checkCollision, this);
 
     this.playerWeapons = this.player.getWeapons()
     for (let i in this.playerWeapons) {
-      // Iterate over each Item to get the effect
+      // Iterate over each item to get the effect
       const weapon = this.playerWeapons[i] as Weapon
       const effect = weapon.getEffect()! as Effect
-      this.physics.add.overlap(
-        effect,
-        this.enemies,
-        this.handleCollision,
-        this.checkCollision,
-        this
-      );
+      this.physics.add.overlap(effect, this.enemies, this.handleCollision, this.checkCollision, this);
       this.time.addEvent({
         delay: weapon.getCooldown() * (1 / this.player.getAttackSpeed()),
         loop: true,
@@ -124,50 +131,61 @@ export default class MainScene extends Phaser.Scene {
         }
       })
     }
+
+    // Events
+    this.events.on('onHitEnemy', (enemy: Unit, weapon: Weapon) => {
+      this.dealDamage(enemy, weapon.getDamage())
+      weapon.addTarget(enemy)
+      this.handleDeath(enemy)
+    }, this);
+
+    this.events.on('onHitPlayer', (player: Player, enemy: Unit) => {
+      this.dealDamage(player, 1)
+      this.handleDeath(player)
+    }, this);
   }
 
   update() {
     // Count frames
     this.timer++
 
-    // this.fpsText.update()
-    this.player.setVelocity(0);
-
     // Controls
+    this.player.setVelocity(0);
     this.handleControls();
     
     // Enemy
-    this.enemies!.children.each((child) => {
-      const unit = child as Unit
-      this.followTarget(unit as Unit, unit.getMoveSpeed() / 2);
-      this.handleDeath(unit)
+    this.enemies.children.each((child) => {
+      const enemy = child as Unit
+      enemy.setDepth(2)
+      this.followTarget(enemy, enemy.getMoveSpeed() / 2);
 		})
-    this.physics.world.wrap(this.enemies!, 500);
+    this.physics.world.wrap(this.enemies, 500);
 
-    // Update effect
+    // Place effect in circle around player
+    this.playerCircle = new Phaser.Geom.Circle(this.player.x, this.player.y, 40);
+    this.aimRotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.mouse.x + this.cameras.main.scrollX, this.mouse.y + this.cameras.main.scrollY)
+    const effects: Array<Effect> = []
+
     for (let i in this.playerWeapons) {
       const weapon = this.playerWeapons[i] as Weapon
       const effect = weapon.getEffect() as Effect
+      effects.push(effect)
 
-      // Place effect in circle around player
-      const circle = new Phaser.Geom.Circle(this.player.x, this.player.y, 40);
-      const mouse = this.input.mousePointer
-      const rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, mouse.x + this.cameras.main.scrollX, mouse.y + this.cameras.main.scrollY)
-      Phaser.Actions.PlaceOnCircle(
-        [effect],
-        circle,
-        rotation
-      );
-      effect.setRotation(rotation)
+      effect.setRotation(this.aimRotation)
 
       // Clean up targets when weapon has attacked
       effect.on('animationcomplete', () => weapon.clearTargets());
     }
 
+    Phaser.Actions.PlaceOnCircle(
+      effects,
+      this.playerCircle,
+      this.aimRotation
+    );
+
     Phaser.Geom.Rectangle.CenterOn(this.physics.world.bounds, this.player.x, this.player.y,)
 
     // Game Over
-    this.handleDeath(this.player)
     this.handleGameOver()
 
     // Pause
@@ -201,7 +219,7 @@ export default class MainScene extends Phaser.Scene {
 
 		// enemy.setInteractive()
 		// 	.on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, pointer => {
-		// 		this.enemies!.despawn(enemy)
+		// 		this.enemies.despawn(enemy)
 		// 	})
 
 		return enemy
@@ -233,6 +251,7 @@ export default class MainScene extends Phaser.Scene {
     const player = isPlayer(collider1) ? collider1 as Player : undefined
     const effect = isEffect(collider1) ? collider1 as Effect : undefined
     const unit = isUnit(collider2) ? collider2 as Unit : undefined
+    const pickup = isPickup(collider2) ? collider2 as Pickup : undefined
 
     if (effect && effect.visible && unit) {
       const weapon = effect.owner as Weapon
@@ -242,7 +261,7 @@ export default class MainScene extends Phaser.Scene {
       if (!targets.includes(unit)) {
         return true
       }
-    } else if (player && unit) {
+    } else if (player && unit || player && pickup) {
       return true
     }
     return false
@@ -252,14 +271,20 @@ export default class MainScene extends Phaser.Scene {
     const player = isPlayer(collider1) ? collider1 as Player : undefined
     const effect = isEffect(collider1) ? collider1 as Effect : undefined
     const unit = isUnit(collider2) ? collider2 as Unit : undefined
+    const pickup = isPickup(collider2) ? collider2 as Pickup : undefined
 
+    // Weapon hits enemy
     if (effect && unit) {
       const weapon = effect.owner as Weapon
-      this.dealDamage(unit, weapon.getDamage())
-      weapon.addTarget(unit)
+      this.events.emit('onHitEnemy', unit, weapon);
+    // Enemy hits player
     } else if (player && unit) {
-      let health = player.getHealth()
-      player.setHealth(health-1)
+      this.events.emit('onHitPlayer', player, unit);
+    // Player pickup
+    } else if (player && pickup) {
+      const amount = 1
+      this.pickups.despawn(pickup)
+      this.events.emit('onGainMoney', amount);
     }
   }
 
@@ -268,7 +293,9 @@ export default class MainScene extends Phaser.Scene {
       if (isPlayer(unit)) {
         this.gameOver = true
       } else {
-        this.enemies!.despawn(unit)
+        const pickup = this.pickups.spawn('pickup_coin', unit.x, unit.y)
+        this.events.emit('onKillEnemy', unit);
+        this.enemies.despawn(unit)
       }
     }
   }

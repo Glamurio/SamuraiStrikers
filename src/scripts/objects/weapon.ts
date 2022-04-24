@@ -57,6 +57,7 @@ export class Weapon extends Item {
 export interface WeaponConfig {
     key: string,
     name: string,
+    icon?: Phaser.Physics.Arcade.Image
     animation: string,
     spriteSheet: string,
     damage: number,
@@ -68,6 +69,7 @@ export const WeaponList: Array<WeaponConfig> = [
   {
     key: 'weapon_katana',
     name: 'Katana',
+    icon: undefined,
     animation: 'katana_attack',
     spriteSheet: 'effects_slash',
     damage: 2,

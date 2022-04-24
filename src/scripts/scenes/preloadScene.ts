@@ -22,8 +22,12 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Effects
     this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png',
-        { frameWidth: 32, frameHeight: 64 }
+      { frameWidth: 32, frameHeight: 64 }
     );
+
+    // Pickups
+    this.load.image('pickup_coin', 'assets/sprites/dungeon/frames/coin_anim_f0.png');
+    
 
     // Audio
     this.load.audio('oni', 'assets/audio/onigiri_no_oni.wav');
@@ -34,7 +38,7 @@ export default class PreloadScene extends Phaser.Scene {
     // Items
     this.anims.create({
       key: 'katana_attack',
-      frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 4 }),
+      frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 0 }),
       frameRate: 10,
       hideOnComplete: true
     });

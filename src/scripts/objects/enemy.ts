@@ -24,7 +24,7 @@ export class EnemyPool extends Phaser.GameObjects.Group {
 		// Scuffed logic, ideally I'd want to overwrite the way Phaser creates Objects
 		if (this.getLength() < this.maxSize) {
 			const enemy = new Enemy(this.scene, x, y, texture, config)
-			this.add(enemy)
+			this.add(enemy, true)
 			// const enemy: Enemy = super.get(x, y, texture)
 
 			if (!enemy) {

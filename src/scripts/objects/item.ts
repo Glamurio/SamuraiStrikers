@@ -5,7 +5,7 @@ export class Item {
   public owner: Unit
   public icon?: Phaser.Physics.Arcade.Image
   
-  constructor(name: string, owner: Unit, icon?: Phaser.Physics.Arcade.Image) {
+  constructor(name: string, owner: Unit) {
     
     this.name = name
     this.owner = owner

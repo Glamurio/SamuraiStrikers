@@ -1,4 +1,5 @@
 import 'phaser'
+import HUDScene from './scenes/hudScene'
 import MainScene from './scenes/mainScene'
 import PauseScene from './scenes/pauseScene'
 import PreloadScene from './scenes/preloadScene'
@@ -17,7 +18,7 @@ const config = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT
   },
-  scene: [PreloadScene, MainScene, PauseScene],
+  scene: [PreloadScene, MainScene, HUDScene, PauseScene],
   input: {
     gamepad: true
   },

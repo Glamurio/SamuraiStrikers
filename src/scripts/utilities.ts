@@ -1,4 +1,5 @@
 import Effect from "./objects/effect";
+import { Pickup } from "./objects/pickup";
 import Player from "./objects/player";
 import { Unit } from "./objects/unit";
 import { Weapon } from "./objects/weapon";
@@ -13,3 +14,4 @@ export const isEffect = (tbd: any) => tbd instanceof Effect
 export const isWeapon = (tbd: any) => tbd instanceof Weapon
 export const isUnit = (tbd: any) => tbd instanceof Unit
 export const isPlayer = (tbd: any) => tbd instanceof Player
+export const isPickup = (tbd: any) => tbd instanceof Pickup
