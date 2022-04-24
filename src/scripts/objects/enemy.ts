@@ -12,7 +12,7 @@ export class EnemyPool extends Phaser.GameObjects.Group {
 	constructor(scene: Phaser.Scene, config: Phaser.Types.GameObjects.Group.GroupConfig = {}) {
 		const defaults: Phaser.Types.GameObjects.Group.GroupConfig = {
 			classType: Enemy,
-			maxSize: 10,
+			maxSize: 50,
 		}
 
 		super(scene, Object.assign(defaults, config))
@@ -22,7 +22,7 @@ export class EnemyPool extends Phaser.GameObjects.Group {
 		const spawnExisting = this.countActive(false) > 0
 
 		// Scuffed logic, ideally I'd want to overwrite the way Phaser creates Objects
-		if (this.getLength() < 10) {
+		if (this.getLength() < this.maxSize) {
 			const enemy = new Enemy(this.scene, x, y, texture, config)
 			this.add(enemy)
 			// const enemy: Enemy = super.get(x, y, texture)

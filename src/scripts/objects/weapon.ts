@@ -1,5 +1,5 @@
 import Effect from './effect'
-import { Upgrade } from './upgrade'
+import { Item } from './item'
 import { Unit } from './unit'
 
 export interface WeaponOptions {
@@ -7,13 +7,12 @@ export interface WeaponOptions {
   cooldown?: number,
 }
 
-export class Weapon extends Upgrade {
+export class Weapon extends Item {
   public targets: Array<Unit> = []
   public name: string
   private effect?: Effect
   private damage: number = 0
   private cooldown: number = 0
-  private attackSpeed: number = 0
   
   // Create new instances of the same class as static attributes
 
@@ -27,7 +26,7 @@ export class Weapon extends Upgrade {
     this.damage = config.damage
     this.cooldown = config.cooldown
 
-    this.effect = new Effect(scene!, config.spritesheet, config.animation, this, false)
+    this.effect = new Effect(scene!, config.spriteSheet, config.animation, this, false)
   }
 
   getDamage() {
@@ -35,9 +34,6 @@ export class Weapon extends Upgrade {
   }
   getCooldown() {
     return this.cooldown
-  }
-  getAttackSpeed() {
-    return this.attackSpeed
   }
   getEffect() {
     return this.effect
@@ -62,9 +58,10 @@ export interface WeaponConfig {
     key: string,
     name: string,
     animation: string,
-    spritesheet: string,
+    spriteSheet: string,
     damage: number,
     cooldown: number,
+    tags: Array<string>
 }
 
 export const WeaponList: Array<WeaponConfig> = [
@@ -72,16 +69,18 @@ export const WeaponList: Array<WeaponConfig> = [
     key: 'weapon_katana',
     name: 'Katana',
     animation: 'katana_attack',
-    spritesheet: 'effects_slash',
-    damage: 1,
-    cooldown: 0
+    spriteSheet: 'effects_slash',
+    damage: 2,
+    cooldown: 1000,
+    tags: ['melee', 'slash']
   },
   {
     key: 'weapon_club',
     name: 'Club',
     animation: 'club_attack',
-    spritesheet: 'effects_slam',
-    damage: 1,
-    cooldown: 0
+    spriteSheet: 'effects_slam',
+    damage: 4,
+    cooldown: 2000,
+    tags: ['melee', 'blunt']
   },
 ]

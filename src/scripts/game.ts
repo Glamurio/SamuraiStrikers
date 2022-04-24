@@ -1,5 +1,6 @@
 import 'phaser'
 import MainScene from './scenes/mainScene'
+import PauseScene from './scenes/pauseScene'
 import PreloadScene from './scenes/preloadScene'
 
 const DEFAULT_WIDTH = 1280
@@ -10,17 +11,20 @@ const config = {
   backgroundColor: '#ffffff',
   scale: {
     parent: 'phaser-game',
+    pixelArt: true,
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT
   },
-  scene: [PreloadScene, MainScene],
+  scene: [PreloadScene, MainScene, PauseScene],
+  input: {
+    gamepad: true
+  },
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
-      gravity: { y: 0 }
+      debug: false
     }
   }
 }

@@ -1,21 +1,23 @@
-import { clamp } from '../utilities'
-import { Upgrade } from './upgrade'
+import { clamp, isWeapon } from '../utilities'
+import { Item } from './item'
 import { Weapon } from './weapon'
 
 export interface UnitOptions {
   damage?:number,
   health?:number,
-  Upgrades?: Array<Upgrade>,
+  items?: Array<Item>,
   moveSpeed?: number,
+  attackSpeed?: number,
   target?: Phaser.GameObjects.Components.Transform
 }
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
-  private upgrades: Array<Upgrade> = []
+  private items: Array<Item>
   private target: Phaser.GameObjects.Components.Transform
-  private damage:number = 0
-  public health:number = 0
-  private moveSpeed: number = 0
+  private damage:number
+  private health:number
+  private attackSpeed: number
+  private moveSpeed: number
   
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string, config: UnitOptions ) {
       
@@ -24,10 +26,11 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 		scene.physics.add.existing(this)
 		scene.physics.world.enable(this)
     
-    this.damage = config.damage!
-    this.health = config.health!
-    this.moveSpeed = config.moveSpeed!
-    this.upgrades = config.Upgrades! || []
+    this.damage = config.damage! || 1
+    this.health = config.health! || 1
+    this.attackSpeed = config.attackSpeed! || 1
+    this.moveSpeed = config.moveSpeed! || 2
+    this.items = config.items! || []
     this.target = config.target!
   }
 
@@ -46,8 +49,15 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.health = clamp(value)
   }
 
+  getAttackSpeed() {
+    return this.attackSpeed
+  }
+  setAttackSpeed(value: number) {
+    this.attackSpeed = clamp(value, 0.01, 1)
+  }
+
   getMoveSpeed() {
-    return this.moveSpeed
+    return this.moveSpeed * 100
   }
   setMoveSpeed(value: number) {
     this.moveSpeed = clamp(value)
@@ -61,16 +71,15 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     return this.target
   }
 
-  // Upgrades
-  addUpgrade(Upgrade: Upgrade) {
-    this.upgrades.push(Upgrade)
+  // Items
+  addItem(item: Item) {
+    this.items.push(item)
   }
-  getUpgrades() {
-    return this.upgrades
+  getItems() {
+    return this.items
   }
   getWeapons() {
-    const isWeapon = (tbd: any): tbd is Weapon => true
-    return this.upgrades.filter(upgrade => isWeapon(upgrade)) as Array<Weapon>
+    return this.items.filter(item => isWeapon(item)) as Array<Weapon>
   }
 
   // setAttribute(attribute: string, value: number | string) {

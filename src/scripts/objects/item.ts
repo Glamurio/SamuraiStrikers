@@ -1,6 +1,6 @@
 import { Unit } from './unit'
 
-export class Upgrade {
+export class Item {
   public name: string
   public owner: Unit
   public icon?: Phaser.Physics.Arcade.Image

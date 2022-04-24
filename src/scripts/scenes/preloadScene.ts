@@ -1,4 +1,5 @@
 export default class PreloadScene extends Phaser.Scene {
+  
   constructor() {
     super({ key: 'PreloadScene' })
   }
@@ -16,9 +17,12 @@ export default class PreloadScene extends Phaser.Scene {
         { frameWidth: 32, frameHeight: 48 }
     );
 
+    // Floor
+    this.load.image('floor', 'assets/sprites/floor.png');
+
     // Effects
-    this.load.spritesheet('effects_slash', 'assets/sprites/effects/slash.png',
-        { frameWidth: 32, frameHeight: 32 }
+    this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png',
+        { frameWidth: 32, frameHeight: 64 }
     );
 
     // Audio
@@ -27,7 +31,7 @@ export default class PreloadScene extends Phaser.Scene {
 
   create() {
     //// Animations
-    // Upgrades
+    // Items
     this.anims.create({
       key: 'katana_attack',
       frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 4 }),
