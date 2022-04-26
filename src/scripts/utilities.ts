@@ -1,4 +1,5 @@
 import Effect from "./objects/effect";
+import { Item } from "./objects/item";
 import { Pickup } from "./objects/pickup";
 import Player from "./objects/player";
 import { Unit } from "./objects/unit";
@@ -11,6 +12,7 @@ export const clamp = (num: number, min: number = 0, max: number = 100) => Math.m
 
 // Type Guards
 export const isEffect = (tbd: any) => tbd instanceof Effect
+export const isItem = (tbd: any) => tbd instanceof Item
 export const isWeapon = (tbd: any) => tbd instanceof Weapon
 export const isUnit = (tbd: any) => tbd instanceof Unit
 export const isPlayer = (tbd: any) => tbd instanceof Player

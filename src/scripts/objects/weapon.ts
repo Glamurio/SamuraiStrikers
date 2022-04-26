@@ -10,25 +10,44 @@ export interface WeaponOptions {
 export class Weapon extends Item {
   public targets: Array<Unit> = []
   public name: string
+  private id: string
   private effect?: Effect
   private damage: number = 0
   private cooldown: number = 0
+  private description: string
+  private attackPosition?: string
   
   // Create new instances of the same class as static attributes
 
-  constructor(key: string, owner: Unit, scene?: Phaser.Scene) {
-    super(key, owner)
+  constructor(id: string, owner?: Unit, scene?: Phaser.Scene) {
+    super(id, owner)
     
-    const config = WeaponList.find(entry => entry.key == key) as WeaponConfig
+    const config = weaponList.find(entry => entry.id == id) as WeaponConfig
 
-    this.name = key
+    this.id = id
+    this.name = config.name
     this.owner = owner
     this.damage = config.damage
     this.cooldown = config.cooldown
+    this.cost = config.cost
+    this.description = config.description
+    this.attackPosition = config.attackPosition
 
     this.effect = new Effect(scene!, config.spriteSheet, config.animation, this, false)
+    // this.effect.anims.create({
+    //   key: config.animation,
+    //   frames: this.effect.anims.generateFrameNumbers(config.spriteSheet, { start: 0, end: 0 }),
+    //   frameRate: 10,
+    //   hideOnComplete: true
+    // });
   }
 
+  getID() {
+    return this.id
+  }
+  getDescription() {
+    return this.description
+  }
   getDamage() {
     return this.damage
   }
@@ -37,6 +56,9 @@ export class Weapon extends Item {
   }
   getEffect() {
     return this.effect
+  }
+  getAttackPosition() {
+    return this.attackPosition
   }
 
   getTargets() {
@@ -55,34 +77,79 @@ export class Weapon extends Item {
 // List of all weapons
 
 export interface WeaponConfig {
-    key: string,
+    id: string,
     name: string,
-    icon?: Phaser.Physics.Arcade.Image
+    description: string,
+    icon?: string
     animation: string,
     spriteSheet: string,
     damage: number,
     cooldown: number,
+    cost: number,
+    attackPosition?: string,
     tags: Array<string>
 }
 
-export const WeaponList: Array<WeaponConfig> = [
+export const weaponList: Array<WeaponConfig> = [
   {
-    key: 'weapon_katana',
+    id: 'weapon_katana',
     name: 'Katana',
-    icon: undefined,
-    animation: 'katana_attack',
+    description: 'Slashy slashy',
+    icon: 'icon_katana',
+    animation: 'attack_katana',
     spriteSheet: 'effects_slash',
     damage: 2,
-    cooldown: 1000,
+    cooldown: 2000,
+    cost: 100,
+    attackPosition: 'circle',
     tags: ['melee', 'slash']
   },
   {
-    key: 'weapon_club',
-    name: 'Club',
-    animation: 'club_attack',
+    id: 'weapon_kanabo',
+    name: 'Kanabō',
+    description: 'Carry a big stick',
+    icon: 'icon_kanabo',
+    animation: 'attack_kanabo',
     spriteSheet: 'effects_slam',
-    damage: 4,
-    cooldown: 2000,
+    damage: 6,
+    cooldown: 6000,
+    cost: 100,
     tags: ['melee', 'blunt']
+  },
+  {
+    id: 'weapon_shuriken',
+    name: 'Shuriken',
+    description: 'Ore ha Ninja',
+    icon: 'icon_shuriken',
+    animation: 'attack_shuriken',
+    spriteSheet: 'effects_shuriken',
+    damage: 1,
+    cooldown: 1000,
+    cost: 100,
+    tags: ['ranged', 'slash']
+  },
+  {
+    id: 'weapon_yumi',
+    name: 'Yumi',
+    description: 'Shoot first, ask later',
+    icon: 'icon_yumi',
+    animation: 'attack_yumi',
+    spriteSheet: 'effects_arrow',
+    damage: 2,
+    cooldown: 4000,
+    cost: 100,
+    tags: ['melee', 'pierce']
+  },
+  {
+    id: 'weapon_naginata',
+    name: 'Naginata',
+    description: 'Cool',
+    icon: 'icon_naginata',
+    animation: 'attack_naginata',
+    spriteSheet: 'effects_circle',
+    damage: 4,
+    cooldown: 6000,
+    cost: 100,
+    tags: ['melee', 'slash']
   },
 ]

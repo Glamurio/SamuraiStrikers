@@ -3,6 +3,7 @@ import HUDScene from './scenes/hudScene'
 import MainScene from './scenes/mainScene'
 import PauseScene from './scenes/pauseScene'
 import PreloadScene from './scenes/preloadScene'
+import ShopScene from './scenes/shopScene'
 
 const DEFAULT_WIDTH = 1280
 const DEFAULT_HEIGHT = 720
@@ -18,7 +19,7 @@ const config = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT
   },
-  scene: [PreloadScene, MainScene, HUDScene, PauseScene],
+  scene: [PreloadScene, MainScene, ShopScene, HUDScene, PauseScene],
   input: {
     gamepad: true
   },

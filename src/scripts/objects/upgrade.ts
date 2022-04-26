@@ -8,9 +8,9 @@ export class Upgrade {
   private damage: number
   private tags: Array<string>
   
-  constructor(key: string, owner: Item | Unit, icon?: Phaser.Physics.Arcade.Image) {
+  constructor(id: string, owner: Item | Unit, icon?: Phaser.Physics.Arcade.Image) {
 
-    const config = UpgradeList.find(entry => entry.key == key) as UpgradeConfig
+    const config = upgradeList.find(entry => entry.id == id) as UpgradeConfig
     
     this.name = config.name
     this.owner = owner
@@ -23,16 +23,16 @@ export class Upgrade {
 // List of all upgrades
 
 export interface UpgradeConfig {
-  key: string,
+  id: string,
   name: string,
   icon?: Phaser.Physics.Arcade.Image
   damage: number,
   tags: Array<string>
 }
 
-export const UpgradeList: Array<UpgradeConfig> = [
+export const upgradeList: Array<UpgradeConfig> = [
   {
-    key: 'upgrade_damage',
+    id: 'upgrade_damage',
     name: 'Damage',
     icon: undefined,
     damage: 2,

@@ -21,13 +21,21 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('floor', 'assets/sprites/floor.png');
 
     // Effects
-    this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png',
-      { frameWidth: 32, frameHeight: 64 }
-    );
+    this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png', { frameWidth: 32, frameHeight: 64 });
+    this.load.spritesheet('effects_slam', 'assets/sprites/test_slam.png', { frameWidth: 32, frameHeight: 64 });
+    this.load.spritesheet('effects_circle', 'assets/sprites/test_circle.png', { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('effects_shuriken', 'assets/sprites/test_shuriken.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('effects_arrow', 'assets/sprites/test_arrow.png', { frameWidth: 32, frameHeight: 32 });
+
+    // Icons
+    this.load.image('icon_katana', 'assets/sprites/Buffs/attack_boost.png');
+    this.load.image('icon_kanabo', 'assets/sprites/Buffs/knockback_boost.png');
+    this.load.image('icon_naginata', 'assets/sprites/Debuffs/attack_down.png');
+    this.load.image('icon_shuriken', 'assets/sprites/Buffs/magic_amplification.png');
+    this.load.image('icon_yumi', 'assets/sprites/Spells/thorn_vine_spell.png');
 
     // Pickups
     this.load.image('pickup_coin', 'assets/sprites/dungeon/frames/coin_anim_f0.png');
-    
 
     // Audio
     this.load.audio('oni', 'assets/audio/onigiri_no_oni.wav');
@@ -35,9 +43,39 @@ export default class PreloadScene extends Phaser.Scene {
 
   create() {
     //// Animations
-    // Items
+    // Weapons
     this.anims.create({
-      key: 'katana_attack',
+      key: 'attack_katana',
+      frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 0 }),
+      frameRate: 10,
+      hideOnComplete: true
+    });
+    this.anims.create({
+      key: 'attack_kanabo',
+      frames: this.anims.generateFrameNumbers('effects_slam', { start: 0, end: 0 }),
+      frameRate: 10,
+      hideOnComplete: true
+    });
+    this.anims.create({
+      key: 'attack_shuriken',
+      frames: this.anims.generateFrameNumbers('effects_shuriken', { start: 0, end: 0 }),
+      frameRate: 10,
+      hideOnComplete: true
+    });
+    this.anims.create({
+      key: 'attack_yumi',
+      frames: this.anims.generateFrameNumbers('effects_arrow', { start: 0, end: 0 }),
+      frameRate: 10,
+      hideOnComplete: true
+    });
+    this.anims.create({
+      key: 'attack_naginata',
+      frames: this.anims.generateFrameNumbers('effects_circle', { start: 0, end: 0 }),
+      frameRate: 10,
+      hideOnComplete: true
+    });
+    this.anims.create({
+      key: 'attack_katana',
       frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 0 }),
       frameRate: 10,
       hideOnComplete: true

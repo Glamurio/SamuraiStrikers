@@ -1,12 +1,13 @@
+import Player from "../objects/player";
 import { Unit } from "../objects/unit";
 import { Weapon } from "../objects/weapon";
 
-export default class  HUDScene extends Phaser.Scene {
+export default class HUDScene extends Phaser.Scene {
   money:number = 0
   killedEnemies:number = 0
   
   constructor () {
-    super({ key: 'UIScene', active: true });
+    super({ key: 'HUDScene', active: true });
   }
 
   create () {
@@ -20,8 +21,15 @@ export default class  HUDScene extends Phaser.Scene {
       let main = this.scene.get('MainScene');
 
       //  Listen for events from it
-      main.events.on('onGainMoney', (amount: number) => {
-        this.money += amount;
+      main.events.on('onGainMoney', (player: Player, amount: number) => {
+        player.addMoney(amount)
+        this.money = player.getMoney();
+        moneyText.setText(`Money ${this.money.toString()}`);
+      }, this);
+
+      main.events.on('onLoseMoney', (player: Player, amount: number) => {
+        player.subtractMoney(amount)
+        this.money = player.getMoney();
         moneyText.setText(`Money ${this.money.toString()}`);
       }, this);
 

@@ -2,13 +2,25 @@ import { Unit } from './unit'
 
 export class Item {
   public name: string
-  public owner: Unit
+  public owner?: Unit
   public icon?: Phaser.Physics.Arcade.Image
+  public cost: number = 0
   
-  constructor(name: string, owner: Unit) {
+  constructor(name: string, owner?: Unit) {
     
     this.name = name
     this.owner = owner
+  }
+
+  getCost() {
+    return this.cost
+  }
+
+  getOwner() {
+    return this.owner
+  }
+  setOwner(unit: Unit) {
+    this.owner = unit
   }
 
   // setAttribute(attribute: string, value: number | string) {

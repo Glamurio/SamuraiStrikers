@@ -108,7 +108,7 @@ export default class MainScene extends Phaser.Scene {
     this.pickups.setDepth(1)
 
     // Items
-    this.player.addItem(new Weapon('weapon_katana', this.player, this))
+    this.player.addItem(new Weapon('weapon_naginata', this.player, this))
 
     // Physics
     this.physics.add.collider(this.player, this.platforms);
@@ -117,19 +117,10 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.pickups, this.handleCollision, this.checkCollision, this);
     // this.physics.add.overlap(this.player, this.enemies, this.handleCollision, this.checkCollision, this);
 
-    this.playerWeapons = this.player.getWeapons()
     for (let i in this.playerWeapons) {
       // Iterate over each item to get the effect
       const weapon = this.playerWeapons[i] as Weapon
-      const effect = weapon.getEffect()! as Effect
-      this.physics.add.overlap(effect, this.enemies, this.handleCollision, this.checkCollision, this);
-      this.time.addEvent({
-        delay: weapon.getCooldown() * (1 / this.player.getAttackSpeed()),
-        loop: true,
-        callback: () => {
-          this.handleAttack(effect)
-        }
-      })
+      this.addWeaponEffect(weapon)
     }
 
     // Events
@@ -142,6 +133,10 @@ export default class MainScene extends Phaser.Scene {
     this.events.on('onHitPlayer', (player: Player, enemy: Unit) => {
       this.dealDamage(player, 1)
       this.handleDeath(player)
+    }, this);
+
+    this.events.on('onGainMoney', (player: Player, amount: number) => {
+      player.addMoney(amount)
     }, this);
   }
 
@@ -161,15 +156,24 @@ export default class MainScene extends Phaser.Scene {
 		})
     this.physics.world.wrap(this.enemies, 500);
 
-    // Place effect in circle around player
+    // Place weapon effects
+    this.playerWeapons = this.player.getWeapons()
     this.playerCircle = new Phaser.Geom.Circle(this.player.x, this.player.y, 40);
     this.aimRotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.mouse.x + this.cameras.main.scrollX, this.mouse.y + this.cameras.main.scrollY)
-    const effects: Array<Effect> = []
+    const effectsOnCircle: Array<Effect> = []
 
     for (let i in this.playerWeapons) {
       const weapon = this.playerWeapons[i] as Weapon
+      this.addWeaponEffect(weapon)
+      
       const effect = weapon.getEffect() as Effect
-      effects.push(effect)
+      switch(weapon.getAttackPosition()) {
+        case 'circle':
+          effectsOnCircle.push(effect)
+          break;
+        default:
+          effect.setPosition(this.player.x, this.player.y)
+      }
 
       effect.setRotation(this.aimRotation)
 
@@ -178,7 +182,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     Phaser.Actions.PlaceOnCircle(
-      effects,
+      effectsOnCircle,
       this.playerCircle,
       this.aimRotation
     );
@@ -191,6 +195,27 @@ export default class MainScene extends Phaser.Scene {
     // Pause
     this.handlePause()
   }
+
+  addWeaponEffect(weapon: Weapon) {
+    const effect = weapon.getEffect()! as Effect
+
+    if (!effect.hasEvent) {
+      this.physics.add.overlap(effect, this.enemies, this.handleCollision, this.checkCollision, this);
+      this.time.addEvent({
+        delay: weapon.getCooldown() * (1 / this.player.getAttackSpeed()),
+        loop: true,
+        callback: () => {
+          this.handleAttack(effect)
+        }
+      })
+    }
+    effect.hasEvent = true
+  }
+
+  openShop() {
+    this.scene.start('shopScene', { player: this.player });
+  }
+
 
   spawnEnemy(type: string, health:number, damage:number) {
     const enemyConfig = { damage: damage, health: health, target: this.player }
@@ -216,11 +241,6 @@ export default class MainScene extends Phaser.Scene {
 		if (!enemy) {
 			return
 		}
-
-		// enemy.setInteractive()
-		// 	.on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, pointer => {
-		// 		this.enemies.despawn(enemy)
-		// 	})
 
 		return enemy
   }
@@ -284,7 +304,7 @@ export default class MainScene extends Phaser.Scene {
     } else if (player && pickup) {
       const amount = 1
       this.pickups.despawn(pickup)
-      this.events.emit('onGainMoney', amount);
+      this.events.emit('onGainMoney', player, amount);
     }
   }
 
@@ -301,8 +321,9 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleAttack(effect: Effect) {
-    effect.visible = true;
-    effect.anims.play(effect.getAnimation());
+    effect.setVisible(true)
+    effect.setScale(2)
+    effect.play(effect.getAnimation());
   }
 
   dealDamage(target: Unit, damage: number) {
@@ -320,7 +341,8 @@ export default class MainScene extends Phaser.Scene {
 
   handlePause() {
     if (this.escapeKey.isDown) {
-      this.scene.launch('PauseScene');
+      this.scene.launch('ShopScene', { player: this.player });
+      // this.scene.launch('PauseScene');
       this.scene.pause();
     }
   }

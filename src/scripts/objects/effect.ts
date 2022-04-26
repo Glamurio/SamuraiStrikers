@@ -2,6 +2,7 @@ import { Weapon } from "./weapon"
 
 export default class Effect extends Phaser.Physics.Arcade.Sprite {
   public owner: Weapon
+  public hasEvent: boolean = false
   private animation: string
   
   constructor(scene: Phaser.Scene, spriteSheet: string, animation: string, owner: Weapon, visible: boolean = false) {

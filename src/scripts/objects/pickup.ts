@@ -1,13 +1,13 @@
 export class Pickup extends Phaser.Physics.Arcade.Sprite {
   public name: string
   
-  constructor(key: string, scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, key)
+  constructor(id: string, scene: Phaser.Scene, x: number, y: number) {
+    super(scene, x, y, id)
     scene.add.existing(this)
 		scene.physics.add.existing(this)
 		scene.physics.world.enable(this)
 
-    const config = PickupList.find(entry => entry.key == key) as PickupConfig
+    const config = pickupList.find(entry => entry.id == id) as PickupConfig
 
     this.name = config.name
   }
@@ -55,13 +55,13 @@ export class PickupPool extends Phaser.GameObjects.Group {
 // List of all pickups
 
 export interface PickupConfig {
-  key: string,
+  id: string,
   name: string,
 }
 
-export const PickupList: Array<PickupConfig> = [
+export const pickupList: Array<PickupConfig> = [
   {
-    key: 'pickup_coin',
+    id: 'pickup_coin',
     name: 'Coin',
   }
 ]
