@@ -82,6 +82,7 @@ export default class ShopScene extends Phaser.Scene {
     let main = this.scene.get('MainScene');
     item.setOwner(this.player)
     this.player.addItem(item)
+    this.player.subtractMoney(item.getCost())
     main.events.emit('onLoseMoney', this.player, item.getCost())
     this.events.emit('onBuyItem', item)
     this.events.emit('onCloseShop')

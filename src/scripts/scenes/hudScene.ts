@@ -22,15 +22,11 @@ export default class HUDScene extends Phaser.Scene {
 
       //  Listen for events from it
       main.events.on('onGainMoney', (player: Player, amount: number) => {
-        player.addMoney(amount)
-        this.money = player.getMoney();
-        moneyText.setText(`Money ${this.money.toString()}`);
+        moneyText.setText(`Money ${player.getMoney().toString()}`);
       }, this);
 
       main.events.on('onLoseMoney', (player: Player, amount: number) => {
-        player.subtractMoney(amount)
-        this.money = player.getMoney();
-        moneyText.setText(`Money ${this.money.toString()}`);
+        moneyText.setText(`Money ${player.getMoney().toString()}`);
       }, this);
 
       main.events.on('onKillEnemy',  (unit: Unit, weapon: Weapon) => {

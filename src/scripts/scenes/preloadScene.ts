@@ -47,37 +47,36 @@ export default class PreloadScene extends Phaser.Scene {
     this.anims.create({
       key: 'attack_katana',
       frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 0 }),
-      frameRate: 10,
+      frameRate: 5,
+      showOnStart: true,
       hideOnComplete: true
     });
     this.anims.create({
       key: 'attack_kanabo',
       frames: this.anims.generateFrameNumbers('effects_slam', { start: 0, end: 0 }),
       frameRate: 10,
+      showOnStart: true,
       hideOnComplete: true
     });
     this.anims.create({
       key: 'attack_shuriken',
       frames: this.anims.generateFrameNumbers('effects_shuriken', { start: 0, end: 0 }),
       frameRate: 10,
+      showOnStart: true,
       hideOnComplete: true
     });
     this.anims.create({
       key: 'attack_yumi',
       frames: this.anims.generateFrameNumbers('effects_arrow', { start: 0, end: 0 }),
-      frameRate: 10,
-      hideOnComplete: true
+      frameRate: 0.1,
+      showOnStart: true,
+      hideOnComplete: false
     });
     this.anims.create({
       key: 'attack_naginata',
       frames: this.anims.generateFrameNumbers('effects_circle', { start: 0, end: 0 }),
-      frameRate: 10,
-      hideOnComplete: true
-    });
-    this.anims.create({
-      key: 'attack_katana',
-      frames: this.anims.generateFrameNumbers('effects_slash', { start: 0, end: 0 }),
-      frameRate: 10,
+      frameRate: 5,
+      showOnStart: true,
       hideOnComplete: true
     });
 

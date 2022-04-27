@@ -1,3 +1,4 @@
+import { clamp } from '../utilities'
 import Effect from './effect'
 import { Item } from './item'
 import { Unit } from './unit'
@@ -14,8 +15,9 @@ export class Weapon extends Item {
   private effect?: Effect
   private damage: number = 0
   private cooldown: number = 0
+  private projectileSpeed: number = 0
   private description: string
-  private attackPosition?: string
+  private attackMethod?: string
   
   // Create new instances of the same class as static attributes
 
@@ -29,9 +31,10 @@ export class Weapon extends Item {
     this.owner = owner
     this.damage = config.damage
     this.cooldown = config.cooldown
+    this.projectileSpeed = config.projectileSpeed || 0
     this.cost = config.cost
     this.description = config.description
-    this.attackPosition = config.attackPosition
+    this.attackMethod = config.attackMethod
 
     this.effect = new Effect(scene!, config.spriteSheet, config.animation, this, false)
     // this.effect.anims.create({
@@ -54,11 +57,14 @@ export class Weapon extends Item {
   getCooldown() {
     return this.cooldown
   }
+  getProjectileSpeed() {
+    return this.projectileSpeed * 100
+  }
   getEffect() {
     return this.effect
   }
-  getAttackPosition() {
-    return this.attackPosition
+  getAttackMethod() {
+    return this.attackMethod
   }
 
   getTargets() {
@@ -85,8 +91,9 @@ export interface WeaponConfig {
     spriteSheet: string,
     damage: number,
     cooldown: number,
+    projectileSpeed?: number,
     cost: number,
-    attackPosition?: string,
+    attackMethod?: string,
     tags: Array<string>
 }
 
@@ -101,7 +108,7 @@ export const weaponList: Array<WeaponConfig> = [
     damage: 2,
     cooldown: 2000,
     cost: 100,
-    attackPosition: 'circle',
+    attackMethod: 'circle',
     tags: ['melee', 'slash']
   },
   {
@@ -125,6 +132,7 @@ export const weaponList: Array<WeaponConfig> = [
     spriteSheet: 'effects_shuriken',
     damage: 1,
     cooldown: 1000,
+    projectileSpeed: 3,
     cost: 100,
     tags: ['ranged', 'slash']
   },
@@ -137,7 +145,9 @@ export const weaponList: Array<WeaponConfig> = [
     spriteSheet: 'effects_arrow',
     damage: 2,
     cooldown: 4000,
+    projectileSpeed: 4,
     cost: 100,
+    attackMethod: 'projectile',
     tags: ['melee', 'pierce']
   },
   {
@@ -149,6 +159,7 @@ export const weaponList: Array<WeaponConfig> = [
     spriteSheet: 'effects_circle',
     damage: 4,
     cooldown: 6000,
+    projectileSpeed: 2,
     cost: 100,
     tags: ['melee', 'slash']
   },
