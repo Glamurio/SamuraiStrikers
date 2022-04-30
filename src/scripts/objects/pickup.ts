@@ -23,11 +23,11 @@ export class PickupPool extends Phaser.GameObjects.Group {
 		super(scene, Object.assign(defaults, config))
 	}
 
-	spawn(key:string, x:number = 0, y:number = 0) {
+	spawn(id: string, x: number = 0, y: number = 0) {
 		const spawnExisting = this.countActive(false) > 0
 
 		// Scuffed logic, ideally I'd want to overwrite the way Phaser creates Objects
-    const pickup = new Pickup(key, this.scene, x, y)
+    const pickup = new Pickup(id, this.scene, x, y)
     pickup.setScale(2)
     this.add(pickup)
 

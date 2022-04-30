@@ -1,7 +1,7 @@
-import Effect from "./objects/effect";
+import { Effect } from "./objects/effect";
 import { Item } from "./objects/item";
 import { Pickup } from "./objects/pickup";
-import Player from "./objects/player";
+import { Player } from "./objects/player";
 import { Unit } from "./objects/unit";
 import { Weapon } from "./objects/weapon";
 

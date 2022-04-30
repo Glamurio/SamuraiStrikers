@@ -1,4 +1,4 @@
-import Player from "../objects/player";
+import { Player } from "../objects/player";
 import { Unit } from "../objects/unit";
 import { Weapon } from "../objects/weapon";
 

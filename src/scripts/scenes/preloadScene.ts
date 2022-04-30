@@ -12,8 +12,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('sky', 'assets/sprites/dummy/sky.png');
     this.load.image('ground', 'assets/sprites/dummy/platform.png');
     this.load.image('star', 'assets/sprites/dummy/star.png');
-    this.load.image('bomb', 'assets/sprites/dummy/bomb.png');
-    this.load.spritesheet('dude', 'assets/sprites/dummy/dude.png',
+    this.load.image('enemy_soldier', 'assets/sprites/dummy/bomb.png');
+    this.load.spritesheet('character_orenji', 'assets/sprites/dummy/dude.png',
         { frameWidth: 32, frameHeight: 48 }
     );
 
@@ -22,9 +22,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Effects
     this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png', { frameWidth: 32, frameHeight: 64 });
-    this.load.spritesheet('effects_slam', 'assets/sprites/test_slam.png', { frameWidth: 32, frameHeight: 64 });
-    this.load.spritesheet('effects_circle', 'assets/sprites/test_circle.png', { frameWidth: 64, frameHeight: 64 });
-    this.load.spritesheet('effects_shuriken', 'assets/sprites/test_shuriken.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('effects_slam', 'assets/sprites/test_slam.png', { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('effects_circle', 'assets/sprites/test_circle.png', { frameWidth: 128, frameHeight: 128 });
+    this.load.spritesheet('effects_shuriken', 'assets/sprites/test_shuriken.png', { frameWidth: 16, frameHeight: 16 });
     this.load.spritesheet('effects_arrow', 'assets/sprites/test_arrow.png', { frameWidth: 32, frameHeight: 32 });
 
     // Icons
@@ -54,16 +54,16 @@ export default class PreloadScene extends Phaser.Scene {
     this.anims.create({
       key: 'attack_kanabo',
       frames: this.anims.generateFrameNumbers('effects_slam', { start: 0, end: 0 }),
-      frameRate: 10,
+      frameRate: 5,
       showOnStart: true,
       hideOnComplete: true
     });
     this.anims.create({
       key: 'attack_shuriken',
       frames: this.anims.generateFrameNumbers('effects_shuriken', { start: 0, end: 0 }),
-      frameRate: 10,
+      frameRate: 0.1,
       showOnStart: true,
-      hideOnComplete: true
+      hideOnComplete: false
     });
     this.anims.create({
       key: 'attack_yumi',
@@ -83,18 +83,18 @@ export default class PreloadScene extends Phaser.Scene {
     // Chars
     this.anims.create({
       key: 'left',
-      frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+      frames: this.anims.generateFrameNumbers('character_orenji', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1
     });
     this.anims.create({
         key: 'turn',
-        frames: [ { key: 'dude', frame: 4 } ],
+        frames: [ { key: 'character_orenji', frame: 4 } ],
         frameRate: 20
     });
     this.anims.create({
         key: 'right',
-        frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+        frames: this.anims.generateFrameNumbers('character_orenji', { start: 5, end: 8 }),
         frameRate: 10,
         repeat: -1
     });

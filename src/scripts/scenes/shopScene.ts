@@ -1,5 +1,5 @@
 import { Item } from "../objects/item";
-import Player from "../objects/player";
+import { Player } from "../objects/player";
 import { Weapon, WeaponConfig, weaponList } from "../objects/weapon";
 
 export default class ShopScene extends Phaser.Scene {
@@ -54,7 +54,7 @@ export default class ShopScene extends Phaser.Scene {
     while(this.possibleWeapons.length && this.shopWeapons.length < this.shopSize) {
       const random = Math.floor((Math.random() * 100) % this.possibleWeapons.length)
       const config = this.possibleWeapons.splice(random, 1)[0]
-      const weapon = new Weapon(config.id, undefined, main)
+      const weapon = new Weapon(config.id, main, undefined)
       this.shopWeapons.push(weapon)
     }
 
@@ -83,8 +83,9 @@ export default class ShopScene extends Phaser.Scene {
     item.setOwner(this.player)
     this.player.addItem(item)
     this.player.subtractMoney(item.getCost())
-    main.events.emit('onLoseMoney', this.player, item.getCost())
     this.events.emit('onBuyItem', item)
+    main.events.emit('onLoseMoney', this.player, item.getCost())
+    main.events.emit('onUpdateStats', this.player)
     this.events.emit('onCloseShop')
   }
 

@@ -1,14 +1,13 @@
 import { clamp } from '../utilities'
-import { Unit, UnitOptions } from './unit'
+import { Unit, UnitConfig } from './unit'
 
-export default class Player extends Unit  {
+export class Player extends Unit  {
 	private money: number = 0
-	constructor(scene: Phaser.Scene, x: number, y: number, texture: string, config: UnitOptions) {
-		super(scene, x, y, texture, config)
+	constructor(id: string, scene: Phaser.Scene, x: number, y: number) {
 
-		this.setDamage(config.damage!)
-		this.setHealth(config.health!)
-    this.setTarget(config.target!)
+		const config = characterList.find(entry => entry.id == id) as UnitConfig
+		super(id, scene, x, y, config)
+
 	}
 
 	subtractMoney(amount: number) {
@@ -23,3 +22,26 @@ export default class Player extends Unit  {
 
   update() {}
 }
+
+// List of all characters
+
+export const characterList: Array<UnitConfig> = [
+	{
+		id: 'character_orenji',
+		name: 'Orenji',
+		description: 'Samurai',
+    damageModifier: 0,
+    critChance: 0,
+    maxHealth: 2,
+    regen: 1,
+    startingItem: 'weapon_katana',
+    moveSpeed: 2,
+    attackSpeed: 1,
+    sizeModifier: 1,
+    strength: 0,
+    dexterity: 0,
+    constitution: 0,
+    skill: 0,
+    resistance: 0,
+	}
+]

@@ -1,27 +1,25 @@
-import { clamp } from '../utilities'
-import Effect from './effect'
+import { Effect, EffectPool } from './effect'
 import { Item } from './item'
 import { Unit } from './unit'
-
-export interface WeaponOptions {
-  damage?: number,
-  cooldown?: number,
-}
 
 export class Weapon extends Item {
   public targets: Array<Unit> = []
   public name: string
   private id: string
-  private effect?: Effect
+  private effect: EffectPool
+  private activeEffects: Array<Effect> = []
   private damage: number = 0
   private cooldown: number = 0
   private projectileSpeed: number = 0
+  private rotation: number = 0
+  private stability: number
   private description: string
   private attackMethod?: string
+  private tags: Array<string>
   
   // Create new instances of the same class as static attributes
 
-  constructor(id: string, owner?: Unit, scene?: Phaser.Scene) {
+  constructor(id: string, scene: Phaser.Scene, owner?: Unit) {
     super(id, owner)
     
     const config = weaponList.find(entry => entry.id == id) as WeaponConfig
@@ -32,11 +30,14 @@ export class Weapon extends Item {
     this.damage = config.damage
     this.cooldown = config.cooldown
     this.projectileSpeed = config.projectileSpeed || 0
+    this.rotation = config.rotation || 0
+    this.stability = config.stability || 0
     this.cost = config.cost
     this.description = config.description
     this.attackMethod = config.attackMethod
+    this.tags = config.tags
 
-    this.effect = new Effect(scene!, config.spriteSheet, config.animation, this, false)
+    this.effect = scene.add.existing(new EffectPool(scene, config.spriteSheet, config.animation))
     // this.effect.anims.create({
     //   key: config.animation,
     //   frames: this.effect.anims.generateFrameNumbers(config.spriteSheet, { start: 0, end: 0 }),
@@ -60,11 +61,36 @@ export class Weapon extends Item {
   getProjectileSpeed() {
     return this.projectileSpeed * 100
   }
-  getEffect() {
-    return this.effect
+  getRotation() {
+    return this.rotation
+  }
+  getStability() {
+    return this.stability
   }
   getAttackMethod() {
     return this.attackMethod
+  }
+
+  getEffect() {
+    return this.effect
+  }
+  addActiveEffect(effect: Effect) {
+    return this.activeEffects.push(effect)
+  }
+  removeActiveEffect(effect: Effect, index?: number) {
+    if(index) {
+      this.activeEffects = this.activeEffects.splice(index, 1);
+    } else {
+      this.activeEffects = this.activeEffects.filter(item => item !== effect)
+    }
+    this.effect.despawn(effect)
+  }
+  getActiveEffects() {
+    return this.activeEffects
+  }
+
+  getTags() {
+    return this.tags
   }
 
   getTargets() {
@@ -92,6 +118,8 @@ export interface WeaponConfig {
     damage: number,
     cooldown: number,
     projectileSpeed?: number,
+    rotation?: number,
+    stability?: number,
     cost: number,
     attackMethod?: string,
     tags: Array<string>
@@ -105,10 +133,10 @@ export const weaponList: Array<WeaponConfig> = [
     icon: 'icon_katana',
     animation: 'attack_katana',
     spriteSheet: 'effects_slash',
-    damage: 2,
-    cooldown: 2000,
+    damage: 4,
+    cooldown: 1000,
     cost: 100,
-    attackMethod: 'circle',
+    attackMethod: 'adjacent',
     tags: ['melee', 'slash']
   },
   {
@@ -121,6 +149,7 @@ export const weaponList: Array<WeaponConfig> = [
     damage: 6,
     cooldown: 6000,
     cost: 100,
+    attackMethod: 'adjacent',
     tags: ['melee', 'blunt']
   },
   {
@@ -130,10 +159,13 @@ export const weaponList: Array<WeaponConfig> = [
     icon: 'icon_shuriken',
     animation: 'attack_shuriken',
     spriteSheet: 'effects_shuriken',
-    damage: 1,
-    cooldown: 1000,
+    damage: 2,
+    cooldown: 500,
     projectileSpeed: 3,
+    rotation: 5,
+    stability: 1,
     cost: 100,
+    attackMethod: 'projectile',
     tags: ['ranged', 'slash']
   },
   {
@@ -146,6 +178,7 @@ export const weaponList: Array<WeaponConfig> = [
     damage: 2,
     cooldown: 4000,
     projectileSpeed: 4,
+    stability: 5,
     cost: 100,
     attackMethod: 'projectile',
     tags: ['melee', 'pierce']
@@ -158,9 +191,10 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_naginata',
     spriteSheet: 'effects_circle',
     damage: 4,
-    cooldown: 6000,
+    cooldown: 3000,
     projectileSpeed: 2,
     cost: 100,
+    attackMethod: 'circle',
     tags: ['melee', 'slash']
   },
 ]
