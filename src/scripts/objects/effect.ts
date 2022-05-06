@@ -4,6 +4,7 @@ export class Effect extends Phaser.Physics.Arcade.Sprite {
   public owner: Weapon
   public animation: string
   public spriteSheet: string
+  public random: number
   
   constructor(scene: Phaser.Scene, spriteSheet: string, animation: string, owner: Weapon, visible: boolean = false) {
     super(scene, 0, 0, spriteSheet)
@@ -17,6 +18,12 @@ export class Effect extends Phaser.Physics.Arcade.Sprite {
     this.spriteSheet = spriteSheet
   }
 
+  setRandom(value: number) {
+    this.random = value
+  }
+  getRandom() {
+    return this.random
+  }
   getAnimation() {
     return this.animation
   }
@@ -65,5 +72,4 @@ export class EffectPool extends Phaser.GameObjects.Group {
 		effect.setVisible(false)
 		effect.destroy()
 	}
-
 }

@@ -22,8 +22,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Effects
     this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png', { frameWidth: 32, frameHeight: 64 });
+    this.load.spritesheet('effects_slash_small', 'assets/sprites/test_slash_small.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('effects_slam', 'assets/sprites/test_slam.png', { frameWidth: 64, frameHeight: 64 });
-    this.load.spritesheet('effects_circle', 'assets/sprites/test_circle.png', { frameWidth: 128, frameHeight: 128 });
+    this.load.spritesheet('effects_circle_half', 'assets/sprites/test_circle.png', { frameWidth: 128, frameHeight: 64 });
     this.load.spritesheet('effects_shuriken', 'assets/sprites/test_shuriken.png', { frameWidth: 16, frameHeight: 16 });
     this.load.spritesheet('effects_arrow', 'assets/sprites/test_arrow.png', { frameWidth: 32, frameHeight: 32 });
 
@@ -33,6 +34,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('icon_naginata', 'assets/sprites/Debuffs/attack_down.png');
     this.load.image('icon_shuriken', 'assets/sprites/Buffs/magic_amplification.png');
     this.load.image('icon_yumi', 'assets/sprites/Spells/thorn_vine_spell.png');
+    this.load.image('icon_wakizashi', 'assets/sprites/Debuffs/disarmed.png');
 
     // Pickups
     this.load.image('pickup_coin', 'assets/sprites/dungeon/frames/coin_anim_f0.png');
@@ -74,7 +76,14 @@ export default class PreloadScene extends Phaser.Scene {
     });
     this.anims.create({
       key: 'attack_naginata',
-      frames: this.anims.generateFrameNumbers('effects_circle', { start: 0, end: 0 }),
+      frames: this.anims.generateFrameNumbers('effects_circle_half', { start: 0, end: 0 }),
+      frameRate: 5,
+      showOnStart: true,
+      hideOnComplete: true
+    });
+    this.anims.create({
+      key: 'attack_wakizashi',
+      frames: this.anims.generateFrameNumbers('effects_slash_small', { start: 0, end: 0 }),
       frameRate: 5,
       showOnStart: true,
       hideOnComplete: true

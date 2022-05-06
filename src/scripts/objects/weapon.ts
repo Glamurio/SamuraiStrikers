@@ -11,9 +11,12 @@ export class Weapon extends Item {
   private damage: number = 0
   private cooldown: number = 0
   private projectileSpeed: number = 0
-  private rotation: number = 0
+  private rotationSpeed: number = 0
   private stability: number
   private description: string
+  private angle: number
+  private alternating: boolean
+  private hasAlternated: boolean
   private attackMethod?: string
   private tags: Array<string>
   
@@ -30,9 +33,11 @@ export class Weapon extends Item {
     this.damage = config.damage
     this.cooldown = config.cooldown
     this.projectileSpeed = config.projectileSpeed || 0
-    this.rotation = config.rotation || 0
+    this.rotationSpeed = config.rotationSpeed || 0
     this.stability = config.stability || 0
     this.cost = config.cost
+    this.angle = config.angle || 0
+    this.alternating = config.alternating || false
     this.description = config.description
     this.attackMethod = config.attackMethod
     this.tags = config.tags
@@ -46,12 +51,18 @@ export class Weapon extends Item {
     // });
   }
 
+  // General
   getID() {
     return this.id
   }
   getDescription() {
     return this.description
   }
+  getTags() {
+    return this.tags
+  }
+
+  // Stats
   getDamage() {
     return this.damage
   }
@@ -62,7 +73,7 @@ export class Weapon extends Item {
     return this.projectileSpeed * 100
   }
   getRotation() {
-    return this.rotation
+    return this.rotationSpeed / 60
   }
   getStability() {
     return this.stability
@@ -71,6 +82,8 @@ export class Weapon extends Item {
     return this.attackMethod
   }
 
+  
+  // Effects
   getEffect() {
     return this.effect
   }
@@ -89,10 +102,21 @@ export class Weapon extends Item {
     return this.activeEffects
   }
 
-  getTags() {
-    return this.tags
+  // Miscellaneous
+  getAngle() {
+    return this.angle
+  }
+  isAlternating() {
+    return this.alternating
+  }
+  getAlternation() {
+    return this.hasAlternated
+  }
+  toggleAlternation() {
+    this.hasAlternated = !this.hasAlternated;
   }
 
+  // Targeting
   getTargets() {
     return this.targets
   }
@@ -118,8 +142,10 @@ export interface WeaponConfig {
     damage: number,
     cooldown: number,
     projectileSpeed?: number,
-    rotation?: number,
+    rotationSpeed?: number,
     stability?: number,
+    angle?: number,
+    alternating?: boolean,
     cost: number,
     attackMethod?: string,
     tags: Array<string>
@@ -135,6 +161,8 @@ export const weaponList: Array<WeaponConfig> = [
     spriteSheet: 'effects_slash',
     damage: 4,
     cooldown: 1000,
+    angle: 45,
+    alternating: true,
     cost: 100,
     attackMethod: 'adjacent',
     tags: ['melee', 'slash']
@@ -147,7 +175,7 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_kanabo',
     spriteSheet: 'effects_slam',
     damage: 6,
-    cooldown: 6000,
+    cooldown: 3000,
     cost: 100,
     attackMethod: 'adjacent',
     tags: ['melee', 'blunt']
@@ -162,7 +190,7 @@ export const weaponList: Array<WeaponConfig> = [
     damage: 2,
     cooldown: 500,
     projectileSpeed: 3,
-    rotation: 5,
+    rotationSpeed: 10,
     stability: 1,
     cost: 100,
     attackMethod: 'projectile',
@@ -189,12 +217,27 @@ export const weaponList: Array<WeaponConfig> = [
     description: 'Cool',
     icon: 'icon_naginata',
     animation: 'attack_naginata',
-    spriteSheet: 'effects_circle',
+    spriteSheet: 'effects_circle_half',
     damage: 4,
-    cooldown: 3000,
+    cooldown: 4000,
     projectileSpeed: 2,
     cost: 100,
-    attackMethod: 'circle',
+    attackMethod: 'adjacent',
+    tags: ['melee', 'slash']
+  },
+  {
+    id: 'weapon_wakizashi',
+    name: 'Wakizashi',
+    description: 'Nothing personal',
+    icon: 'icon_wakizashi',
+    animation: 'attack_wakizashi',
+    spriteSheet: 'effects_slash_small',
+    damage: 3,
+    cooldown: 500,
+    angle: 0,
+    alternating: true,
+    cost: 100,
+    attackMethod: 'random',
     tags: ['melee', 'slash']
   },
 ]

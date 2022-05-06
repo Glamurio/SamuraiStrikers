@@ -16,7 +16,6 @@ export default class MainScene extends Phaser.Scene {
   // Player
   player: Player
   playerWeapons?: Array<Weapon>
-  playerCircle: Phaser.Geom.Circle
   effectsOnCircle: Array<Effect> = []
   aimRotation: number
   circleDegree: number = 0
@@ -86,7 +85,6 @@ export default class MainScene extends Phaser.Scene {
     this.platforms.create(750, 220, 'ground');
 
     // Player
-    const playerConfig = { health: 2, moveSpeed: 2 }
     const screenCenterX = this.cameras.main.worldView.x + this.cameras.main.width / 2;
     const screenCenterY = this.cameras.main.worldView.y + this.cameras.main.height / 2;
     this.player = new Player('character_orenji', this, screenCenterX, screenCenterY)
@@ -110,7 +108,7 @@ export default class MainScene extends Phaser.Scene {
     this.pickups.setDepth(1)
 
     // Items
-    this.player.addItem(new Weapon('weapon_shuriken', this, this.player))
+    this.player.addItem(new Weapon('weapon_katana', this, this.player))
 
     // Physics
     this.physics.add.collider(this.player, this.platforms);
@@ -119,7 +117,6 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.pickups, this.handleCollision, this.checkCollision, this);
     // this.physics.add.overlap(this.player, this.enemies, this.handleCollision, this.checkCollision, this);
 
-    this.playerCircle = new Phaser.Geom.Circle(this.player.x, this.player.y, 40);
     // for (let i in this.playerWeapons) {
     //   // Iterate over each item to get the effect
     //   const weapon = this.playerWeapons[i] as Weapon
@@ -149,6 +146,9 @@ export default class MainScene extends Phaser.Scene {
       unit.updateValues()
     }, this);
 
+    // this.events.on('onAttackWeapon', (weapon: Weapon, effect: Effect, unit: Unit) => {
+
+    // }, this)
   }
 
   update() {
@@ -196,6 +196,7 @@ export default class MainScene extends Phaser.Scene {
     const weaponEffect = weapon.getEffect() as EffectPool
     const attackMethod = weapon.getAttackMethod()
     const activeEffects: Array<Effect> = weapon.getActiveEffects()
+    const circle = new Phaser.Geom.Circle(unit.x, unit.y, 40)
 
     if (!weaponEffect.hasEvent) {
       this.physics.add.overlap(weaponEffect, this.enemies, this.handleCollision, this.checkCollision, this);
@@ -211,22 +212,29 @@ export default class MainScene extends Phaser.Scene {
 
     for (let i in activeEffects) {
       const effect = activeEffects[i] as Effect
+
+      // effect.body.setSize(effect.width, effect.height)
       switch(attackMethod) {
         case 'adjacent':
-          this.playerCircle.setTo(unit.x, unit.y, 40)
-          const point = this.playerCircle.getPoint(this.circleDegree)
-          effect.setPosition(point.x, point.y)
+          const angle = weapon.getAngle()
+          const alternating = weapon.isAlternating()
+          const alternation = alternating ? weapon.getAlternation() : false
+          const circleDegree = angle ? alternation ? this.circleDegree + (angle / 360) : this.circleDegree - (angle / 360) : this.circleDegree
+          const degreePoint = circle.getPoint(circleDegree)
+          effect.setPosition(degreePoint.x, degreePoint.y)
           break;
         case 'projectile':
           effect.rotation += weapon.getRotation()
           break
-        case 'circle':
-          effect.setPosition(unit.x, unit.y)
+        case 'random':
+          const randomPoint = new Phaser.Geom.Circle(unit.x, unit.y, 40).getPoint(effect.getRandom())
+          effect.setPosition(randomPoint.x, randomPoint.y)
+          break
         default:
           break
       }
 
-      if (effect.visible && !Phaser.Geom.Rectangle.Contains(this.physics.world.bounds, effect.x, effect.y)) {
+      if (!Phaser.Geom.Rectangle.Contains(this.physics.world.bounds, effect.x, effect.y)) {
         weapon.removeActiveEffect(effect, parseInt(i))
       }
     }
@@ -345,12 +353,25 @@ export default class MainScene extends Phaser.Scene {
   handleAttack(weapon: Weapon, unit: Unit) {
     const weaponEffect = weapon.getEffect() as EffectPool
     const effect = weaponEffect.spawn(weaponEffect.spriteSheet, weaponEffect.animation, weapon) as Effect
+    const angle = weapon.getAngle()
+    const alternating = weapon.isAlternating()
+    const alternation = alternating ? weapon.getAlternation() : false
+    const attackMethod = weapon.getAttackMethod()
     weapon.addActiveEffect(effect)
 
     this.circleDegree = Phaser.Math.RadToDeg(this.aimRotation) < 0 ? 1 + (Phaser.Math.RadToDeg(this.aimRotation) / 360) : Phaser.Math.RadToDeg(this.aimRotation) / 360
 
-    effect.setPosition(unit.x, unit.y)
-    effect.setRotation(this.aimRotation)
+    const rotation = angle ? alternation ? this.aimRotation - angle : this.aimRotation + angle : this.aimRotation
+    weapon.toggleAlternation()
+
+    effect.setRotation(rotation)
+    const random = Math.random()
+    effect.setRandom(random)
+    if (attackMethod == 'projectile') {
+      effect.setPosition(unit.x, unit.y)
+    } else if (attackMethod == 'random') {
+      effect.setRotation(random * 2 * Math.PI)
+    }
 
     effect.setScale(unit.getSizeModifier())
     effect.play(effect.getAnimation());
@@ -359,6 +380,8 @@ export default class MainScene extends Phaser.Scene {
 
     // Clean up targets when weapon has attacked
     weapon.clearTargets()
+
+    this.events.emit('onAttackWeapon', weapon, effect, unit)
   }
 
   dealDamage(target: Unit, damage: number) {

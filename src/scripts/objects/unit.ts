@@ -19,7 +19,6 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   private critChance: number
   private damageModifier: number
   private resistance: number
-
   
   constructor(id: string, scene: Phaser.Scene, x: number, y: number, config: UnitConfig ) {
     super(scene, x, y, id)
