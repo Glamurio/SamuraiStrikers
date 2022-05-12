@@ -18,7 +18,7 @@ export default class MainScene extends Phaser.Scene {
   playerWeapons?: Array<Weapon>
   effectsOnCircle: Array<Effect> = []
   aimRotation: number
-  circleDegree: number = 0
+  circleAimDegree: number = 0
 
   // Misc
   enemies: EnemyPool
@@ -108,7 +108,7 @@ export default class MainScene extends Phaser.Scene {
     this.pickups.setDepth(1)
 
     // Items
-    this.player.addItem(new Weapon('weapon_katana', this, this.player))
+    this.player.addItem(new Weapon('weapon_naginata', this, this.player))
 
     // Physics
     this.physics.add.collider(this.player, this.platforms);
@@ -124,6 +124,7 @@ export default class MainScene extends Phaser.Scene {
     // }
 
     // Events
+
     this.events.on('onHitEnemy', (enemy: Unit, weapon: Weapon, effect: Effect) => {
       this.dealDamage(enemy, weapon.getDamage())
       weapon.addTarget(enemy)
@@ -212,19 +213,23 @@ export default class MainScene extends Phaser.Scene {
 
     for (let i in activeEffects) {
       const effect = activeEffects[i] as Effect
-
-      // effect.body.setSize(effect.width, effect.height)
+      const angle = weapon.getAngle()
+      if (effect && effect.body) {
+        effect.rotation += weapon.getRotation()
+        effect.body.setSize(effect.width, effect.height)   
+      }
       switch(attackMethod) {
-        case 'adjacent':
-          const angle = weapon.getAngle()
-          const alternating = weapon.isAlternating()
-          const alternation = alternating ? weapon.getAlternation() : false
-          const circleDegree = angle ? alternation ? this.circleDegree + (angle / 360) : this.circleDegree - (angle / 360) : this.circleDegree
-          const degreePoint = circle.getPoint(circleDegree)
-          effect.setPosition(degreePoint.x, degreePoint.y)
+        case 'alternating':
+          const alternation = weapon.getAlternation()
+          const alternatingDegree = angle ? alternation ? this.circleAimDegree + (angle / 360) : this.circleAimDegree - (angle / 360) : this.circleAimDegree
+          const alternatingPoint = circle.getPoint(alternatingDegree)
+          if (weapon.getProjectileSpeed() <= 0) {
+            effect.setPosition(alternatingPoint.x, alternatingPoint.y)
+          }
           break;
-        case 'projectile':
-          effect.rotation += weapon.getRotation()
+        case 'static':
+          const staticPoint = circle.getPoint((this.circleAimDegree + (angle / 360)) % 1 )
+          effect.setPosition(staticPoint.x, staticPoint.y)
           break
         case 'random':
           const randomPoint = new Phaser.Geom.Circle(unit.x, unit.y, 40).getPoint(effect.getRandom())
@@ -354,29 +359,42 @@ export default class MainScene extends Phaser.Scene {
     const weaponEffect = weapon.getEffect() as EffectPool
     const effect = weaponEffect.spawn(weaponEffect.spriteSheet, weaponEffect.animation, weapon) as Effect
     const angle = weapon.getAngle()
-    const alternating = weapon.isAlternating()
-    const alternation = alternating ? weapon.getAlternation() : false
+    const aimAngle = Phaser.Math.RadToDeg(this.aimRotation)
     const attackMethod = weapon.getAttackMethod()
     weapon.addActiveEffect(effect)
 
-    this.circleDegree = Phaser.Math.RadToDeg(this.aimRotation) < 0 ? 1 + (Phaser.Math.RadToDeg(this.aimRotation) / 360) : Phaser.Math.RadToDeg(this.aimRotation) / 360
+    this.circleAimDegree = Phaser.Math.RadToDeg(this.aimRotation) < 0 ? 1 + (Phaser.Math.RadToDeg(this.aimRotation) / 360) : Phaser.Math.RadToDeg(this.aimRotation) / 360
+    const effectAngle = angle ? weapon.getAlternation() ? aimAngle - angle : aimAngle + angle : aimAngle
 
-    const rotation = angle ? alternation ? this.aimRotation - angle : this.aimRotation + angle : this.aimRotation
-    weapon.toggleAlternation()
+    switch(attackMethod) {
+      case 'alternating':
+        weapon.toggleAlternation()
+        effect.setAngle(effectAngle)
+        break;
+      case 'static':
+        effect.setAngle(effectAngle)
+        break
+      case 'random':
+        const random = Math.random()
+        effect.setRotation(random * 2 * Math.PI)
+        break
+      default:
+        break
+    }
 
-    effect.setRotation(rotation)
-    const random = Math.random()
-    effect.setRandom(random)
-    if (attackMethod == 'projectile') {
+    if (weapon.getProjectileSpeed() > 0) {
+      console.log(weapon.name)
       effect.setPosition(unit.x, unit.y)
-    } else if (attackMethod == 'random') {
-      effect.setRotation(random * 2 * Math.PI)
+      effect.setAngle(effectAngle)
+
+      const mouseToUnit = new Phaser.Math.Vector2(this.mouse.x + this.cameras.main.scrollX - unit.x, this.mouse.y + this.cameras.main.scrollY - unit.y)
+      mouseToUnit.setAngle(Phaser.Math.DegToRad(effectAngle))
+      // const mouseUnitAngle = Phaser.Math.Angle.Between(mouseToUnit.x, mouseToUnit.y, unit.body.velocity.x, unit.body.velocity.y)
+      this.physics.moveTo(effect, mouseToUnit.x + unit.x, mouseToUnit.y + unit.y, weapon.getProjectileSpeed())
     }
 
     effect.setScale(unit.getSizeModifier())
     effect.play(effect.getAnimation());
-
-    this.physics.moveTo(effect, this.mouse.x + this.cameras.main.scrollX, this.mouse.y + this.cameras.main.scrollY, weapon.getProjectileSpeed())
 
     // Clean up targets when weapon has attacked
     weapon.clearTargets()

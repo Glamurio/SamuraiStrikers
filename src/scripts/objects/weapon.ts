@@ -15,7 +15,6 @@ export class Weapon extends Item {
   private stability: number
   private description: string
   private angle: number
-  private alternating: boolean
   private hasAlternated: boolean
   private attackMethod?: string
   private tags: Array<string>
@@ -37,7 +36,6 @@ export class Weapon extends Item {
     this.stability = config.stability || 0
     this.cost = config.cost
     this.angle = config.angle || 0
-    this.alternating = config.alternating || false
     this.description = config.description
     this.attackMethod = config.attackMethod
     this.tags = config.tags
@@ -106,9 +104,6 @@ export class Weapon extends Item {
   getAngle() {
     return this.angle
   }
-  isAlternating() {
-    return this.alternating
-  }
   getAlternation() {
     return this.hasAlternated
   }
@@ -164,7 +159,8 @@ export const weaponList: Array<WeaponConfig> = [
     angle: 45,
     alternating: true,
     cost: 100,
-    attackMethod: 'adjacent',
+    attackMethod: 'alternating',
+    projectileSpeed: 3,
     tags: ['melee', 'slash']
   },
   {
@@ -191,6 +187,7 @@ export const weaponList: Array<WeaponConfig> = [
     cooldown: 500,
     projectileSpeed: 3,
     rotationSpeed: 10,
+    angle: 180,
     stability: 1,
     cost: 100,
     attackMethod: 'projectile',
@@ -219,10 +216,10 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_naginata',
     spriteSheet: 'effects_circle_half',
     damage: 4,
-    cooldown: 4000,
-    projectileSpeed: 2,
+    cooldown: 400,
+    angle: 180,
     cost: 100,
-    attackMethod: 'adjacent',
+    attackMethod: 'static',
     tags: ['melee', 'slash']
   },
   {

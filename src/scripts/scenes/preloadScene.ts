@@ -24,7 +24,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.spritesheet('effects_slash', 'assets/sprites/test_slash.png', { frameWidth: 32, frameHeight: 64 });
     this.load.spritesheet('effects_slash_small', 'assets/sprites/test_slash_small.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('effects_slam', 'assets/sprites/test_slam.png', { frameWidth: 64, frameHeight: 64 });
-    this.load.spritesheet('effects_circle_half', 'assets/sprites/test_circle.png', { frameWidth: 128, frameHeight: 64 });
+    this.load.spritesheet('effects_circle_half', 'assets/sprites/test_circle_half.png', { frameWidth: 64, frameHeight: 128 });
     this.load.spritesheet('effects_shuriken', 'assets/sprites/test_shuriken.png', { frameWidth: 16, frameHeight: 16 });
     this.load.spritesheet('effects_arrow', 'assets/sprites/test_arrow.png', { frameWidth: 32, frameHeight: 32 });
 

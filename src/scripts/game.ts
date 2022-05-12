@@ -11,6 +11,7 @@ const DEFAULT_HEIGHT = 720
 const config = {
   type: Phaser.AUTO,
   backgroundColor: '#ffffff',
+  disableContextMenu: true,
   scale: {
     parent: 'phaser-game',
     pixelArt: true,
