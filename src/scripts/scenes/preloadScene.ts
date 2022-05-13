@@ -39,8 +39,26 @@ export default class PreloadScene extends Phaser.Scene {
     // Pickups
     this.load.image('pickup_coin', 'assets/sprites/dungeon/frames/coin_anim_f0.png');
 
-    // Audio
-    this.load.audio('oni', 'assets/audio/onigiri_no_oni.wav');
+    //// Audio
+    // Music
+    this.load.audio('oni', 'assets/audio/music/onigiri_no_oni.wav');
+
+    // SFX
+    this.load.audio('sound_coin_1', 'assets/audio/sfx/coin_collect_1.mp3');
+    this.load.audio('sound_coin_2', 'assets/audio/sfx/coin_collect_2.mp3');
+    this.load.audio('sound_coin_3', 'assets/audio/sfx/coin_collect_3.mp3');
+
+    this.load.audio('sound_sword_1', 'assets/audio/sfx/sword_swing_1.mp3');
+    this.load.audio('sound_sword_2', 'assets/audio/sfx/sword_swing_2.mp3');
+    this.load.audio('sound_sword_3', 'assets/audio/sfx/sword_swing_3.mp3');
+
+    this.load.audio('sound_sheathe_1', 'assets/audio/sfx/sword_sheathe_1.mp3');
+    this.load.audio('sound_sheathe_2', 'assets/audio/sfx/sword_sheathe_2.mp3');
+
+    this.load.audio('sound_club_1', 'assets/audio/sfx/club_swing_1.mp3');
+    this.load.audio('sound_club_2', 'assets/audio/sfx/club_swing_2.mp3');
+
+    this.load.audio('sound_confirm', 'assets/audio/sfx/menu_confirm.mp3');
   }
 
   create() {

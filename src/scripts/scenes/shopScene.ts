@@ -72,8 +72,10 @@ export default class ShopScene extends Phaser.Scene {
         itemButton.emit('clicked', itemText, weapon);
       });
       itemButton.on('clicked', (text: Phaser.GameObjects.Text, item: Item) => {
-        text.setText('Bought')
-        this.buyItem(item)
+        if(this.player.getMoney() >= item.getCost()) {
+          this.buyItem(item)
+          text.setText('Bought')
+        }
       })
     }
   }

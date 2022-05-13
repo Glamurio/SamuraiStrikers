@@ -23,7 +23,6 @@ export default class MainScene extends Phaser.Scene {
   // Misc
   enemies: EnemyPool
   pickups: PickupPool
-  timer: number = 0
 
   // Controls
   mouse: Phaser.Input.Pointer
@@ -99,7 +98,7 @@ export default class MainScene extends Phaser.Scene {
 			delay: 200,
 			loop: true,
 			callback: () => {
-				this.spawnEnemy('enemy_soldier', this.player, 2, 1)
+				this.spawnEnemy('enemy_soldier', this.player)
 			}
 		})
 
@@ -108,7 +107,7 @@ export default class MainScene extends Phaser.Scene {
     this.pickups.setDepth(1)
 
     // Items
-    this.player.addItem(new Weapon('weapon_naginata', this, this.player))
+    this.player.addItem(new Weapon('weapon_katana', this, this.player))
 
     // Physics
     this.physics.add.collider(this.player, this.platforms);
@@ -153,11 +152,9 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update() {
-    // Count frames
-    this.timer++
 
     // Controls
-    this.player.setVelocity(0);
+    this.player.setVelocity(0, 0);
     this.handleControls();
     
     // Enemy
@@ -199,44 +196,59 @@ export default class MainScene extends Phaser.Scene {
     const activeEffects: Array<Effect> = weapon.getActiveEffects()
     const circle = new Phaser.Geom.Circle(unit.x, unit.y, 40)
 
-    if (!weaponEffect.hasEvent) {
+    // Slash on mouse
+    if(this.mouse.leftButtonDown() && weapon.isReady()) {
       this.physics.add.overlap(weaponEffect, this.enemies, this.handleCollision, this.checkCollision, this);
-      this.time.addEvent({
-        delay: weapon.getCooldown() * (1 / this.player.getAttackSpeed()),
-        loop: true,
-        callback: () => {
-          this.handleAttack(weapon, unit)
-        }
-      })
-      weaponEffect.hasEvent = true
+      this.handleAttack(weapon, unit)
+      weapon.setReady(false)
+      setTimeout(function() {
+        weapon.setReady(true)
+      }, weapon.getCooldown() * (1 / this.player.getAttackSpeed()))
     }
+
+    // if (!weaponEffect.hasEvent) {
+    //   this.time.addEvent({
+    //     delay: weapon.getCooldown() * (1 / this.player.getAttackSpeed()),
+    //     loop: true,
+    //     callback: () => {
+    //       this.handleAttack(weapon, unit)
+    //     }
+    //   })
+    //   weaponEffect.hasEvent = true
+    // }
 
     for (let i in activeEffects) {
       const effect = activeEffects[i] as Effect
       const angle = weapon.getAngle()
       if (effect && effect.body) {
         effect.rotation += weapon.getRotation()
-        effect.body.setSize(effect.width, effect.height)   
-      }
-      switch(attackMethod) {
-        case 'alternating':
-          const alternation = weapon.getAlternation()
-          const alternatingDegree = angle ? alternation ? this.circleAimDegree + (angle / 360) : this.circleAimDegree - (angle / 360) : this.circleAimDegree
-          const alternatingPoint = circle.getPoint(alternatingDegree)
-          if (weapon.getProjectileSpeed() <= 0) {
-            effect.setPosition(alternatingPoint.x, alternatingPoint.y)
-          }
-          break;
-        case 'static':
-          const staticPoint = circle.getPoint((this.circleAimDegree + (angle / 360)) % 1 )
-          effect.setPosition(staticPoint.x, staticPoint.y)
-          break
-        case 'random':
-          const randomPoint = new Phaser.Geom.Circle(unit.x, unit.y, 40).getPoint(effect.getRandom())
-          effect.setPosition(randomPoint.x, randomPoint.y)
-          break
-        default:
-          break
+        effect.body.setSize(effect.width, effect.height)
+        switch(attackMethod) {
+          case 'alternating':
+            const alternation = weapon.getAlternation()
+            const alternatingDegree = angle ? alternation ? this.circleAimDegree + (angle / 360) : this.circleAimDegree - (angle / 360) : this.circleAimDegree
+            const alternatingPoint = circle.getPoint(alternatingDegree)
+            if (weapon.getProjectileSpeed() <= 0) {
+              effect.setPosition(alternatingPoint.x, alternatingPoint.y)
+            }
+            break;
+          case 'melee':
+            const baseVelocity = effect.getBaseVelocity()
+            effect.setVelocity(unit.body.velocity.x + baseVelocity.x, unit.body.velocity.y + baseVelocity.y)
+            break
+          case 'ranged':
+            break
+          case 'static':
+            const staticPoint = circle.getPoint((this.circleAimDegree + (angle / 360)) % 1 )
+            effect.setPosition(staticPoint.x, staticPoint.y)
+            break
+          case 'random':
+            const randomPoint = new Phaser.Geom.Circle(unit.x, unit.y, 40).getPoint(effect.getRandom())
+            effect.setPosition(randomPoint.x, randomPoint.y)
+            break
+          default:
+            break
+        }
       }
 
       if (!Phaser.Geom.Rectangle.Contains(this.physics.world.bounds, effect.x, effect.y)) {
@@ -250,7 +262,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
 
-  spawnEnemy(id: string, target?: Unit, health?: number, damage?: number) {
+  spawnEnemy(id: string, target?: Unit) {
 
     if (!this.enemies) {
 			return
@@ -340,6 +352,9 @@ export default class MainScene extends Phaser.Scene {
       const amount = 1
       this.pickups.despawn(pickup)
       player.addMoney(amount)
+      const sound = this.sound.add('sound_coin_3') as Phaser.Sound.HTML5AudioSound
+      sound.volume = 0.05
+      sound.play()
       this.events.emit('onGainMoney', player, amount);
     }
   }
@@ -356,6 +371,13 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleAttack(weapon: Weapon, unit: Unit) {
+    // SFX
+    const sound = weapon.getSound() ? this.sound.add(weapon.getSound()) as Phaser.Sound.HTML5AudioSound : undefined
+    if (sound) {
+      sound.volume = 0.1;
+      sound.play();
+    }
+
     const weaponEffect = weapon.getEffect() as EffectPool
     const effect = weaponEffect.spawn(weaponEffect.spriteSheet, weaponEffect.animation, weapon) as Effect
     const angle = weapon.getAngle()
@@ -366,31 +388,41 @@ export default class MainScene extends Phaser.Scene {
     this.circleAimDegree = Phaser.Math.RadToDeg(this.aimRotation) < 0 ? 1 + (Phaser.Math.RadToDeg(this.aimRotation) / 360) : Phaser.Math.RadToDeg(this.aimRotation) / 360
     const effectAngle = angle ? weapon.getAlternation() ? aimAngle - angle : aimAngle + angle : aimAngle
 
+    effect.setPosition(unit.x, unit.y)
+    effect.setAngle(effectAngle)
+
     switch(attackMethod) {
       case 'alternating':
         weapon.toggleAlternation()
         effect.setAngle(effectAngle)
         break;
+      case 'melee':
+        const random = Math.random()
+        const randomPoint = new Phaser.Geom.Circle(unit.x, unit.y, 60).getPoint(random)
+        effect.setRandom(random)
+        if(isPlayer(unit)) {
+          if(angle == -1) {}
+          const mouseToUnit = new Phaser.Math.Vector2(this.mouse.x + this.cameras.main.scrollX - unit.x, this.mouse.y + this.cameras.main.scrollY - unit.y)
+          mouseToUnit.setAngle(Phaser.Math.DegToRad(effectAngle))
+          this.physics.moveTo(effect, mouseToUnit.x + unit.x, mouseToUnit.y + unit.y, weapon.getProjectileSpeed())
+        } else {
+          const target = unit.getTarget()
+          this.physics.moveTo(effect, target.x + unit.x, target.y + unit.y, weapon.getProjectileSpeed())
+        }
+        if(angle == -1) {
+          effect.setRotation(random * 2 * Math.PI)
+          this.physics.moveTo(effect, randomPoint.x, randomPoint.y, weapon.getProjectileSpeed())
+        }
+        effect.setBaseVelocity(effect.body.velocity.x, effect.body.velocity.y)
+        break
+      case 'ranged':
+        this.physics.moveTo(effect, this.mouse.x + this.cameras.main.scrollX, this.mouse.y + this.cameras.main.scrollY, weapon.getProjectileSpeed())
+        break
       case 'static':
         effect.setAngle(effectAngle)
         break
-      case 'random':
-        const random = Math.random()
-        effect.setRotation(random * 2 * Math.PI)
-        break
       default:
         break
-    }
-
-    if (weapon.getProjectileSpeed() > 0) {
-      console.log(weapon.name)
-      effect.setPosition(unit.x, unit.y)
-      effect.setAngle(effectAngle)
-
-      const mouseToUnit = new Phaser.Math.Vector2(this.mouse.x + this.cameras.main.scrollX - unit.x, this.mouse.y + this.cameras.main.scrollY - unit.y)
-      mouseToUnit.setAngle(Phaser.Math.DegToRad(effectAngle))
-      // const mouseUnitAngle = Phaser.Math.Angle.Between(mouseToUnit.x, mouseToUnit.y, unit.body.velocity.x, unit.body.velocity.y)
-      this.physics.moveTo(effect, mouseToUnit.x + unit.x, mouseToUnit.y + unit.y, weapon.getProjectileSpeed())
     }
 
     effect.setScale(unit.getSizeModifier())

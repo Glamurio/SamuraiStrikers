@@ -6,10 +6,12 @@ export class Weapon extends Item {
   public targets: Array<Unit> = []
   public name: string
   private id: string
+  private sound: string
   private effect: EffectPool
   private activeEffects: Array<Effect> = []
   private damage: number = 0
   private cooldown: number = 0
+  private ready: boolean = true
   private projectileSpeed: number = 0
   private rotationSpeed: number = 0
   private stability: number
@@ -38,6 +40,7 @@ export class Weapon extends Item {
     this.angle = config.angle || 0
     this.description = config.description
     this.attackMethod = config.attackMethod
+    this.sound = config.sound || ''
     this.tags = config.tags
 
     this.effect = scene.add.existing(new EffectPool(scene, config.spriteSheet, config.animation))
@@ -56,8 +59,17 @@ export class Weapon extends Item {
   getDescription() {
     return this.description
   }
+  getSound() {
+    return this.sound
+  }
   getTags() {
     return this.tags
+  }
+  isReady() {
+    return this.ready
+  }
+  setReady(value: boolean) {
+    this.ready = value
   }
 
   // Stats
@@ -131,7 +143,8 @@ export interface WeaponConfig {
     id: string,
     name: string,
     description: string,
-    icon?: string
+    icon?: string,
+    sound?: string,
     animation: string,
     spriteSheet: string,
     damage: number,
@@ -140,7 +153,6 @@ export interface WeaponConfig {
     rotationSpeed?: number,
     stability?: number,
     angle?: number,
-    alternating?: boolean,
     cost: number,
     attackMethod?: string,
     tags: Array<string>
@@ -152,16 +164,16 @@ export const weaponList: Array<WeaponConfig> = [
     name: 'Katana',
     description: 'Slashy slashy',
     icon: 'icon_katana',
+    sound: 'sound_sword_1',
     animation: 'attack_katana',
     spriteSheet: 'effects_slash',
     damage: 4,
     cooldown: 1000,
-    angle: 45,
-    alternating: true,
+    angle: 0,
     cost: 100,
-    attackMethod: 'alternating',
-    projectileSpeed: 3,
-    tags: ['melee', 'slash']
+    attackMethod: 'melee',
+    projectileSpeed: 2.5,
+    tags: ['slash']
   },
   {
     id: 'weapon_kanabo',
@@ -171,10 +183,10 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_kanabo',
     spriteSheet: 'effects_slam',
     damage: 6,
-    cooldown: 3000,
+    cooldown: 500,
     cost: 100,
-    attackMethod: 'adjacent',
-    tags: ['melee', 'blunt']
+    attackMethod: 'melee',
+    tags: ['blunt']
   },
   {
     id: 'weapon_shuriken',
@@ -190,8 +202,8 @@ export const weaponList: Array<WeaponConfig> = [
     angle: 180,
     stability: 1,
     cost: 100,
-    attackMethod: 'projectile',
-    tags: ['ranged', 'slash']
+    attackMethod: 'ranged',
+    tags: ['slash']
   },
   {
     id: 'weapon_yumi',
@@ -205,8 +217,8 @@ export const weaponList: Array<WeaponConfig> = [
     projectileSpeed: 4,
     stability: 5,
     cost: 100,
-    attackMethod: 'projectile',
-    tags: ['melee', 'pierce']
+    attackMethod: 'ranged',
+    tags: ['pierce']
   },
   {
     id: 'weapon_naginata',
@@ -216,11 +228,11 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_naginata',
     spriteSheet: 'effects_circle_half',
     damage: 4,
-    cooldown: 400,
+    cooldown: 4000,
     angle: 180,
     cost: 100,
     attackMethod: 'static',
-    tags: ['melee', 'slash']
+    tags: ['slash']
   },
   {
     id: 'weapon_wakizashi',
@@ -230,11 +242,11 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_wakizashi',
     spriteSheet: 'effects_slash_small',
     damage: 3,
-    cooldown: 500,
-    angle: 0,
-    alternating: true,
+    cooldown: 200,
+    projectileSpeed: 2,
+    angle: -1,
     cost: 100,
-    attackMethod: 'random',
-    tags: ['melee', 'slash']
+    attackMethod: 'melee',
+    tags: ['slash']
   },
 ]

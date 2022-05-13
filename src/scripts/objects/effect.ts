@@ -4,6 +4,7 @@ export class Effect extends Phaser.Physics.Arcade.Sprite {
   public owner: Weapon
   public animation: string
   public spriteSheet: string
+  public baseVelocity: Phaser.Math.Vector2
   public random: number
   
   constructor(scene: Phaser.Scene, spriteSheet: string, animation: string, owner: Weapon, visible: boolean = false) {
@@ -23,6 +24,12 @@ export class Effect extends Phaser.Physics.Arcade.Sprite {
   }
   getRandom() {
     return this.random
+  }
+  setBaseVelocity(x: number, y: number) {
+    this.baseVelocity = new Phaser.Math.Vector2(x, y)
+  }
+  getBaseVelocity() {
+    return this.baseVelocity
   }
   getAnimation() {
     return this.animation
@@ -49,7 +56,6 @@ export class EffectPool extends Phaser.GameObjects.Group {
 	spawn(spriteSheet: string, animation: string, owner: Weapon) {
 		const spawnExisting = this.countActive(false) > 0
 
-		// Scuffed logic, ideally I'd want to overwrite the way Phaser creates Objects
     const effect = this.get(0, 0, spriteSheet)
     effect.animation = animation
     effect.owner = owner
