@@ -146,6 +146,10 @@ export default class MainScene extends Phaser.Scene {
       unit.updateValues()
     }, this);
 
+    // this.events.on('onChargedWeapon', (unit: Unit, weapon: Weapon) => {
+
+    // }, this);
+
     // this.events.on('onAttackWeapon', (weapon: Weapon, effect: Effect, unit: Unit) => {
 
     // }, this)
@@ -191,19 +195,46 @@ export default class MainScene extends Phaser.Scene {
 
   handleWeaponEffect(weapon: Weapon, unit: Unit) {
     // Place weapon effects
-    const weaponEffect = weapon.getEffect() as EffectPool
     const attackMethod = weapon.getAttackMethod()
     const activeEffects: Array<Effect> = weapon.getActiveEffects()
     const circle = new Phaser.Geom.Circle(unit.x, unit.y, 40)
+    let charge = unit.getCharge()
 
     // Slash on mouse
-    if(this.mouse.leftButtonDown() && weapon.isReady()) {
-      this.physics.add.overlap(weaponEffect, this.enemies, this.handleCollision, this.checkCollision, this);
-      this.handleAttack(weapon, unit)
-      weapon.setReady(false)
-      setTimeout(function() {
-        weapon.setReady(true)
-      }, weapon.getCooldown() * (1 / this.player.getAttackSpeed()))
+    if(weapon.isReady()) {
+      if (this.mouse.leftButtonDown()) {
+        this.handleAttack(weapon, unit)
+      }
+      if (this.mouse.rightButtonDown() && !unit.isCharging()) {
+        unit.setCharging(true)
+        const sound = this.sound.add('sound_sheathe_1') as Phaser.Sound.HTML5AudioSound
+        sound.volume = 0.05
+        sound.play()
+      }
+
+      // Charge mechanic
+      if (unit.isCharging() && unit.getCharge() < 120) {
+        unit.increaseCharge()
+        charge = unit.getCharge()
+      }
+
+      if (unit.getCharge() >= 120 && !unit.getFullCharge()) {
+        unit.setFullCharge(true)
+        const sound = this.sound.add('sound_ability_ready') as Phaser.Sound.HTML5AudioSound
+        sound.volume = 0.05
+        sound.play()
+        this.events.emit('onChargedWeapon', unit, weapon)
+      }
+
+      if (this.mouse.rightButtonReleased() && unit.isCharging()) {
+        unit.setCharging(false)
+        unit.setFullCharge(false)
+        const sound = this.sound.add('sound_sheathe_2') as Phaser.Sound.HTML5AudioSound
+        sound.volume = 0.05
+        sound.play()
+        console.log(unit.getCharge())
+        this.handleAttack(weapon, unit)
+      }
     }
 
     // if (!weaponEffect.hasEvent) {
@@ -220,6 +251,8 @@ export default class MainScene extends Phaser.Scene {
     for (let i in activeEffects) {
       const effect = activeEffects[i] as Effect
       const angle = weapon.getAngle()
+      const chargeBonus = (1 + (charge / 100))
+      effect.setScale(chargeBonus)
       if (effect && effect.body) {
         effect.rotation += weapon.getRotation()
         effect.body.setSize(effect.width, effect.height)
@@ -293,7 +326,8 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleControls() {
-    const moveSpeed = this.player.getMoveSpeed()
+    const moveSpeed = this.player.isCharging() ? this.player.getMoveSpeed() / 2 : this.player.getMoveSpeed()
+
     if (this.arrowKeys.left.isDown || this.keyA.isDown) {
       this.player.setVelocityX(-moveSpeed);
       this.player.anims.play('left', true);
@@ -371,19 +405,20 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleAttack(weapon: Weapon, unit: Unit) {
-    // SFX
-    const sound = weapon.getSound() ? this.sound.add(weapon.getSound()) as Phaser.Sound.HTML5AudioSound : undefined
-    if (sound) {
-      sound.volume = 0.1;
-      sound.play();
-    }
-
     const weaponEffect = weapon.getEffect() as EffectPool
     const effect = weaponEffect.spawn(weaponEffect.spriteSheet, weaponEffect.animation, weapon) as Effect
     const angle = weapon.getAngle()
     const aimAngle = Phaser.Math.RadToDeg(this.aimRotation)
     const attackMethod = weapon.getAttackMethod()
     weapon.addActiveEffect(effect)
+
+    // Cooldown
+    weapon.setReady(false)
+    setTimeout(() => {
+      weapon.setReady(true)
+      unit.resetCharge()
+    }, weapon.getCooldown() * (1 / this.player.getAttackSpeed()))
+    this.physics.add.overlap(weaponEffect, this.enemies, this.handleCollision, this.checkCollision, this)
 
     this.circleAimDegree = Phaser.Math.RadToDeg(this.aimRotation) < 0 ? 1 + (Phaser.Math.RadToDeg(this.aimRotation) / 360) : Phaser.Math.RadToDeg(this.aimRotation) / 360
     const effectAngle = angle ? weapon.getAlternation() ? aimAngle - angle : aimAngle + angle : aimAngle
@@ -430,6 +465,13 @@ export default class MainScene extends Phaser.Scene {
 
     // Clean up targets when weapon has attacked
     weapon.clearTargets()
+
+    // SFX
+    const sound = weapon.getSound() ? this.sound.add(weapon.getSound()) as Phaser.Sound.HTML5AudioSound : undefined
+    if (sound) {
+      sound.volume = 0.1;
+      sound.play();
+    }
 
     this.events.emit('onAttackWeapon', weapon, effect, unit)
   }

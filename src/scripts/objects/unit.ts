@@ -19,6 +19,9 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   private critChance: number
   private damageModifier: number
   private resistance: number
+  private charging: boolean = false
+  private charge: number = 0
+  private fullCharge: boolean = false
   
   constructor(id: string, scene: Phaser.Scene, x: number, y: number, config: UnitConfig ) {
     super(scene, x, y, id)
@@ -48,6 +51,30 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  // Misc
+  setCharging(value: boolean) {
+    this.charging = value
+  }
+  isCharging() {
+    return this.charging
+  }
+  increaseCharge() {
+    this.charge++
+  }
+  resetCharge() {
+    this.charge = 0
+  }
+  getCharge() {
+    return this.charge
+  }
+  setFullCharge(value: boolean) {
+    this.fullCharge = value
+  }
+  getFullCharge() {
+    return this.fullCharge
+  }
+
+
   // Stats
   getHealth() {
     return this.health
@@ -74,6 +101,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     return this.critChance
   }
 
+  // Damage
   damageUnit(value: number) {
     this.health = clamp(this.health) - clamp(value)
   }
@@ -110,21 +138,6 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   getWeapons() {
     return this.items.filter(item => isWeapon(item)) as Array<Weapon>
   }
-
-  // setAttribute(attribute: string, value: number | string) {
-  //   if (this.attributes[attribute] != undefined) {
-  //     this.attributes[attribute] = value as any instanceof Number ? clamp(value as number) : value
-  //   } else {
-  //     console.log(`'${attribute}' is not an attribute.`)
-  //   }
-  // }
-  // getAttribute(attribute: string) {
-  //   if (this.attributes[attribute] != undefined) {
-  //     return this.attributes[attribute]
-  //   } else {
-  //     return console.log(`'${attribute}' is not an attribute.`)
-  //   }
-  // }
 
   update() {}
 }

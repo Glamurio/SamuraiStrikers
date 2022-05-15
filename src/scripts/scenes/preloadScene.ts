@@ -58,6 +58,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.audio('sound_club_1', 'assets/audio/sfx/club_swing_1.mp3');
     this.load.audio('sound_club_2', 'assets/audio/sfx/club_swing_2.mp3');
 
+    this.load.audio('sound_ability_ready', 'assets/audio/sfx/ability_ready.mp3');
+
     this.load.audio('sound_confirm', 'assets/audio/sfx/menu_confirm.mp3');
   }
 
