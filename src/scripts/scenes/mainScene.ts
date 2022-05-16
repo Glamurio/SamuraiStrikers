@@ -198,7 +198,6 @@ export default class MainScene extends Phaser.Scene {
     const attackMethod = weapon.getAttackMethod()
     const activeEffects: Array<Effect> = weapon.getActiveEffects()
     const circle = new Phaser.Geom.Circle(unit.x, unit.y, 40)
-    let charge = unit.getCharge()
 
     // Slash on mouse
     if(weapon.isReady()) {
@@ -215,7 +214,6 @@ export default class MainScene extends Phaser.Scene {
       // Charge mechanic
       if (unit.isCharging() && unit.getCharge() < 120) {
         unit.increaseCharge()
-        charge = unit.getCharge()
       }
 
       if (unit.getCharge() >= 120 && !unit.getFullCharge()) {
@@ -232,7 +230,6 @@ export default class MainScene extends Phaser.Scene {
         const sound = this.sound.add('sound_sheathe_2') as Phaser.Sound.HTML5AudioSound
         sound.volume = 0.05
         sound.play()
-        console.log(unit.getCharge())
         this.handleAttack(weapon, unit)
       }
     }
@@ -251,7 +248,7 @@ export default class MainScene extends Phaser.Scene {
     for (let i in activeEffects) {
       const effect = activeEffects[i] as Effect
       const angle = weapon.getAngle()
-      const chargeBonus = (1 + (charge / 100))
+      const chargeBonus = (1 + (unit.getCharge() / 100))
       effect.setScale(chargeBonus)
       if (effect && effect.body) {
         effect.rotation += weapon.getRotation()
@@ -330,21 +327,25 @@ export default class MainScene extends Phaser.Scene {
 
     if (this.arrowKeys.left.isDown || this.keyA.isDown) {
       this.player.setVelocityX(-moveSpeed);
-      this.player.anims.play('left', true);
+      this.player.flipX = true
+      this.player.anims.play('walk', true);
     }
     else if (this.arrowKeys.right.isDown || this.keyD.isDown) {
-        this.player.setVelocityX(moveSpeed);
-        this.player.anims.play('right', true);
-    } else {
-        this.player.anims.play('turn', true);
+      this.player.setVelocityX(moveSpeed);
+      this.player.flipX = false
+      this.player.anims.play('walk', true);
     }
 
     if (this.arrowKeys.up.isDown || this.keyW.isDown) {
-        this.player.setVelocityY(-moveSpeed);
-        this.player.anims.play('left', true);
+      this.player.setVelocityY(-moveSpeed);
+      this.player.anims.play('walk', true);
     } else if (this.arrowKeys.down.isDown || this.keyS.isDown) {
-        this.player.setVelocityY(moveSpeed);
-        this.player.anims.play('right', true);
+      this.player.setVelocityY(moveSpeed);
+      this.player.anims.play('walk', true);
+    }
+
+    if(this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0) {
+      this.player.anims.play('stand', true);
     }
   }
   
@@ -410,6 +411,7 @@ export default class MainScene extends Phaser.Scene {
     const angle = weapon.getAngle()
     const aimAngle = Phaser.Math.RadToDeg(this.aimRotation)
     const attackMethod = weapon.getAttackMethod()
+    const chargeBonus = (1 + (unit.getCharge() / 100))
     weapon.addActiveEffect(effect)
 
     // Cooldown
@@ -448,7 +450,7 @@ export default class MainScene extends Phaser.Scene {
           effect.setRotation(random * 2 * Math.PI)
           this.physics.moveTo(effect, randomPoint.x, randomPoint.y, weapon.getProjectileSpeed())
         }
-        effect.setBaseVelocity(effect.body.velocity.x, effect.body.velocity.y)
+        effect.setBaseVelocity(effect.body.velocity.x * (chargeBonus * 2), effect.body.velocity.y * (chargeBonus * 2))
         break
       case 'ranged':
         this.physics.moveTo(effect, this.mouse.x + this.cameras.main.scrollX, this.mouse.y + this.cameras.main.scrollY, weapon.getProjectileSpeed())

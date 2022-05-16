@@ -35,7 +35,7 @@ export const characterList: Array<UnitConfig> = [
     maxHealth: 2,
     regen: 1,
     startingItem: 'weapon_katana',
-    moveSpeed: 2,
+    moveSpeed: 1.5,
     attackSpeed: 1,
     sizeModifier: 1,
     strength: 0,

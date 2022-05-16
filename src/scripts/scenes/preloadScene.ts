@@ -13,8 +13,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('ground', 'assets/sprites/dummy/platform.png');
     this.load.image('star', 'assets/sprites/dummy/star.png');
     this.load.image('enemy_soldier', 'assets/sprites/dummy/bomb.png');
-    this.load.spritesheet('character_orenji', 'assets/sprites/dummy/dude.png',
-        { frameWidth: 32, frameHeight: 48 }
+    this.load.spritesheet('character_orenji', 'assets/sprites/chars/char_orenji.png',
+        { frameWidth: 55, frameHeight: 55 }
     );
 
     // Floor
@@ -111,21 +111,15 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Chars
     this.anims.create({
-      key: 'left',
+      key: 'walk',
       frames: this.anims.generateFrameNumbers('character_orenji', { start: 0, end: 3 }),
-      frameRate: 10,
+      frameRate: 3,
       repeat: -1
     });
     this.anims.create({
-        key: 'turn',
-        frames: [ { key: 'character_orenji', frame: 4 } ],
+        key: 'stand',
+        frames: [{ key: 'character_orenji', frame: 1 } ],
         frameRate: 20
-    });
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('character_orenji', { start: 5, end: 8 }),
-        frameRate: 10,
-        repeat: -1
     });
 
     this.scene.start('MainScene')
