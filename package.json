@@ -1,6 +1,6 @@
 {
   "name": "samurai-strikers",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "A simple game.",
   "main": "main.js",
   "scripts": {

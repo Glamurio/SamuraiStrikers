@@ -115,8 +115,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.attackSpeed = (this.config.attackSpeed || 1) * (1 + this.dexterity * 0.05)
     this.moveSpeed = (this.config.moveSpeed || 1) * (1 + this.dexterity * 0.05)
     this.sizeModifier = (this.config.sizeModifier || 1) * (1 + this.skill * 0.05)
-    this.critChance = (this.config.critChance || 0) + this.skill * 0.05
-    this.resistance = (this.config.resistance || 0) + this.strength * 0.02
+    this.critChance = (this.config.critChance || 0) + (this.skill * 0.05)
+    this.resistance = (this.config.resistance || 0) + (this.strength * 0.02)
     this.damageModifier = (this.config.damageModifier || 0) + (1 + this.strength * 0.05)
   }
 

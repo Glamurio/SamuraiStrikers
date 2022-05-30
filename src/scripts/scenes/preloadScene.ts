@@ -34,7 +34,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('icon_naginata', 'assets/sprites/Debuffs/attack_down.png');
     this.load.image('icon_shuriken', 'assets/sprites/Buffs/magic_amplification.png');
     this.load.image('icon_yumi', 'assets/sprites/Spells/thorn_vine_spell.png');
-    this.load.image('icon_wakizashi', 'assets/sprites/Debuffs/disarmed.png');
+    this.load.image('icon_tanto', 'assets/sprites/Debuffs/disarmed.png');
 
     // Pickups
     this.load.image('pickup_coin', 'assets/sprites/dungeon/frames/coin_anim_f0.png');
@@ -102,7 +102,7 @@ export default class PreloadScene extends Phaser.Scene {
       hideOnComplete: true
     });
     this.anims.create({
-      key: 'attack_wakizashi',
+      key: 'attack_tanto',
       frames: this.anims.generateFrameNumbers('effects_slash_small', { start: 0, end: 0 }),
       frameRate: 5,
       showOnStart: true,

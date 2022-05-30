@@ -12,6 +12,7 @@ export class Weapon extends Item {
   private damage: number = 0
   private cooldown: number = 0
   private ready: boolean = true
+  private bonusProjectiles: number
   private projectileSpeed: number = 0
   private rotationSpeed: number = 0
   private stability: number
@@ -33,6 +34,7 @@ export class Weapon extends Item {
     this.owner = owner
     this.damage = config.damage
     this.cooldown = config.cooldown
+    this.bonusProjectiles = config.bonusProjectiles || 0
     this.projectileSpeed = config.projectileSpeed || 0
     this.rotationSpeed = config.rotationSpeed || 0
     this.stability = config.stability || 0
@@ -78,6 +80,9 @@ export class Weapon extends Item {
   }
   getCooldown() {
     return this.cooldown
+  }
+  getBonusProjectiles() {
+    return this.bonusProjectiles
   }
   getProjectileSpeed() {
     return this.projectileSpeed * 100
@@ -149,6 +154,7 @@ export interface WeaponConfig {
     spriteSheet: string,
     damage: number,
     cooldown: number,
+    bonusProjectiles?: number,
     projectileSpeed?: number,
     rotationSpeed?: number,
     stability?: number,
@@ -171,14 +177,15 @@ export const weaponList: Array<WeaponConfig> = [
     cooldown: 1000,
     angle: 0,
     cost: 100,
+    bonusProjectiles: 1,
     attackMethod: 'melee',
     projectileSpeed: 2.5,
-    tags: ['slash']
+    tags: ['reach']
   },
   {
     id: 'weapon_kanabo',
     name: 'Kanabō',
-    description: 'Carry a big stick',
+    description: 'Bonk',
     icon: 'icon_kanabo',
     animation: 'attack_kanabo',
     spriteSheet: 'effects_slam',
@@ -186,7 +193,7 @@ export const weaponList: Array<WeaponConfig> = [
     cooldown: 500,
     cost: 100,
     attackMethod: 'melee',
-    tags: ['blunt']
+    tags: ['area']
   },
   {
     id: 'weapon_shuriken',
@@ -195,27 +202,27 @@ export const weaponList: Array<WeaponConfig> = [
     icon: 'icon_shuriken',
     animation: 'attack_shuriken',
     spriteSheet: 'effects_shuriken',
-    damage: 2,
+    damage: 1,
     cooldown: 500,
-    projectileSpeed: 3,
+    projectileSpeed: 4,
     rotationSpeed: 10,
     angle: 180,
     stability: 1,
     cost: 100,
     attackMethod: 'ranged',
-    tags: ['slash']
+    tags: ['amount']
   },
   {
     id: 'weapon_yumi',
     name: 'Yumi',
-    description: 'Shoot first, ask later',
+    description: '',
     icon: 'icon_yumi',
     animation: 'attack_yumi',
     spriteSheet: 'effects_arrow',
     damage: 2,
-    cooldown: 4000,
-    projectileSpeed: 4,
-    stability: 5,
+    cooldown: 1000,
+    projectileSpeed: 3,
+    stability: 1,
     cost: 100,
     attackMethod: 'ranged',
     tags: ['pierce']
@@ -223,7 +230,7 @@ export const weaponList: Array<WeaponConfig> = [
   {
     id: 'weapon_naginata',
     name: 'Naginata',
-    description: 'Cool',
+    description: '',
     icon: 'icon_naginata',
     animation: 'attack_naginata',
     spriteSheet: 'effects_circle_half',
@@ -232,14 +239,14 @@ export const weaponList: Array<WeaponConfig> = [
     angle: 180,
     cost: 100,
     attackMethod: 'static',
-    tags: ['slash']
+    tags: ['area']
   },
   {
-    id: 'weapon_wakizashi',
-    name: 'Wakizashi',
-    description: 'Nothing personal',
-    icon: 'icon_wakizashi',
-    animation: 'attack_wakizashi',
+    id: 'weapon_tanto',
+    name: 'Tanto',
+    description: '',
+    icon: 'icon_tanto',
+    animation: 'attack_tanto',
     spriteSheet: 'effects_slash_small',
     damage: 3,
     cooldown: 200,
@@ -247,6 +254,6 @@ export const weaponList: Array<WeaponConfig> = [
     angle: -1,
     cost: 100,
     attackMethod: 'melee',
-    tags: ['slash']
+    tags: ['reach', 'amount']
   },
 ]

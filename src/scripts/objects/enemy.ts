@@ -29,12 +29,14 @@ export class EnemyPool extends Phaser.GameObjects.Group {
 		if (this.getLength() < this.maxSize) {
 			const enemy = new Enemy(id, this.scene, x, y, target!)
 			this.add(enemy, true)
-			// const enemy: Enemy = super.get(x, y, texture)
+			// const enemy: Enemy = super.get(x, y, id)
 
 			if (!enemy) {
 				return
 			}
-	
+			
+			// enemy.setTarget(target!)
+
 			if (spawnExisting) {
 				enemy.setActive(true)
 				enemy.setVisible(true)
