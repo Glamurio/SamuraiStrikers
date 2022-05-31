@@ -1,12 +1,12 @@
 import { Unit, UnitConfig } from './unit'
 
 export class Enemy extends Unit {
-	constructor(id: string, scene: Phaser.Scene, x: number, y: number, target?: Unit) {
+	constructor(scene: Phaser.Scene, x: number, y: number, id: string, target?: Unit) {
 
 		const config = enemyList.find(entry => entry.id == id) as UnitConfig
-		super(id, scene, x, y, config)
+		super(scene, x, y, id, config)
 
-		this.setTarget(target!)
+		this.setTarget(target!)	
 	}
 
   update() {}
@@ -23,35 +23,28 @@ export class EnemyPool extends Phaser.GameObjects.Group {
 	}
 
 	spawn(id:string, target?: Unit, x:number = 0, y:number = 0) {
-		const spawnExisting = this.countActive(false) > 0
+		const enemy: Enemy = this.get(x, y, id)
 
-		// Scuffed logic, ideally I'd want to overwrite the way Phaser creates Objects
-		if (this.getLength() < this.maxSize) {
-			const enemy = new Enemy(id, this.scene, x, y, target!)
-			this.add(enemy, true)
-			// const enemy: Enemy = super.get(x, y, id)
-
-			if (!enemy) {
-				return
-			}
-			
-			// enemy.setTarget(target!)
-
-			if (spawnExisting) {
-				enemy.setActive(true)
-				enemy.setVisible(true)
-			}
-	
-			return enemy
-
+		if (!enemy) {
+			return
 		}
+
+		enemy.setTarget(target!)
+
+		enemy.setActive(true)
+		enemy.setVisible(true)
+		enemy.setInteractive()
+		enemy.body.enable = true
+
+		return enemy
+
 	}
 
 	despawn(enemy: Enemy) {
 		enemy.setActive(false)
 		enemy.setVisible(false)
 		enemy.removeInteractive()
-		enemy.destroy()
+		enemy.body.enable = false
 	}
 
 }

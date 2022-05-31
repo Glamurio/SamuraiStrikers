@@ -59,16 +59,13 @@ export class EffectPool extends Phaser.GameObjects.Group {
     const effect = this.get(0, 0, spriteSheet)
     effect.animation = animation
     effect.owner = owner
-    this.add(effect)
 
     if (!effect) {
       return
     }
 
-    if (spawnExisting) {
-      effect.setActive(true)
-      effect.setVisible(true)
-    }
+    effect.setActive(true)
+    effect.setVisible(true)
 
     return effect
 	}
@@ -76,6 +73,5 @@ export class EffectPool extends Phaser.GameObjects.Group {
 	despawn(effect: Effect) {
 		effect.setActive(false)
 		effect.setVisible(false)
-		effect.destroy()
 	}
 }

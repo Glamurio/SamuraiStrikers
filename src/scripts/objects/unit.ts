@@ -23,7 +23,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   private charge: number = 0
   private fullCharge: boolean = false
   
-  constructor(id: string, scene: Phaser.Scene, x: number, y: number, config: UnitConfig ) {
+  constructor(scene: Phaser.Scene, x: number, y: number, id: string, config: UnitConfig ) {
     super(scene, x, y, id)
     scene.add.existing(this)
 		scene.physics.add.existing(this)

@@ -86,7 +86,7 @@ export default class MainScene extends Phaser.Scene {
     // Player
     const screenCenterX = this.cameras.main.worldView.x + this.cameras.main.width / 2;
     const screenCenterY = this.cameras.main.worldView.y + this.cameras.main.height / 2;
-    this.player = new Player('character_orenji', this, screenCenterX, screenCenterY)
+    this.player = new Player(this, screenCenterX, screenCenterY, 'character_orenji',)
     this.player.setCollideWorldBounds(false);
     this.player.setDepth(2)
     this.cameras.main.startFollow(this.player);
@@ -111,7 +111,7 @@ export default class MainScene extends Phaser.Scene {
     // Physics
     this.physics.add.collider(this.player, this.platforms);
     this.physics.add.collider(this.enemies, this.platforms);
-    // this.physics.add.collider(this.enemies, this.enemies);
+    this.physics.add.collider(this.enemies, this.enemies);
     this.physics.add.overlap(this.player, this.pickups, this.handleCollision, this.checkCollision, this);
     // this.physics.add.overlap(this.player, this.enemies, this.handleCollision, this.checkCollision, this);
 
@@ -299,9 +299,6 @@ export default class MainScene extends Phaser.Scene {
 			return
 		}
 
-		if (this.enemies.countActive(true) >= this.enemies.maxSize) {
-			return
-		}
     const height:number = this.cameras.main.height
     const width:number = this.cameras.main.width
     let potentialX: number

@@ -3,10 +3,10 @@ import { Unit, UnitConfig } from './unit'
 
 export class Player extends Unit  {
 	private money: number = 0
-	constructor(id: string, scene: Phaser.Scene, x: number, y: number) {
+	constructor(scene: Phaser.Scene, x: number, y: number, id: string) {
 
 		const config = characterList.find(entry => entry.id == id) as UnitConfig
-		super(id, scene, x, y, config)
+		super(scene, x, y, id, config)
 
 	}
 

@@ -1,7 +1,7 @@
 export class Pickup extends Phaser.Physics.Arcade.Sprite {
   public name: string
   
-  constructor(id: string, scene: Phaser.Scene, x: number, y: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number, id: string) {
     super(scene, x, y, id)
     scene.add.existing(this)
 		scene.physics.add.existing(this)
@@ -24,21 +24,16 @@ export class PickupPool extends Phaser.GameObjects.Group {
 	}
 
 	spawn(id: string, x: number = 0, y: number = 0) {
-		const spawnExisting = this.countActive(false) > 0
 
-		// Scuffed logic, ideally I'd want to overwrite the way Phaser creates Objects
-    const pickup = new Pickup(id, this.scene, x, y)
-    pickup.setScale(2)
-    this.add(pickup)
+    const pickup: Pickup = this.get(x, y, id)
 
     if (!pickup) {
       return
     }
 
-    if (spawnExisting) {
-      pickup.setActive(true)
-      pickup.setVisible(true)
-    }
+    pickup.setScale(2)
+    pickup.setActive(true)
+    pickup.setVisible(true)
 
     return pickup
 	}
@@ -46,8 +41,6 @@ export class PickupPool extends Phaser.GameObjects.Group {
 	despawn(pickup: Pickup) {
 		pickup.setActive(false)
 		pickup.setVisible(false)
-		pickup.removeInteractive()
-		pickup.destroy()
 	}
 
 }
