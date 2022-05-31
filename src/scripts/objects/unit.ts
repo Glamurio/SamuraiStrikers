@@ -3,8 +3,8 @@ import { Item } from './item'
 import { Weapon } from './weapon'
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
+  public config: UnitConfig
   private items: Array<Item> = []
-  private config: UnitConfig
   private target: Phaser.GameObjects.Components.Transform
   private strength: number
   private dexterity: number
@@ -18,6 +18,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   private moveSpeed: number
   private critChance: number
   private damageModifier: number
+  private contactDamage: number
   private resistance: number
   private charging: boolean = false
   private charge: number = 0
@@ -40,6 +41,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.critChance = config.critChance || 0
     this.resistance = config.resistance || 0
     this.damageModifier = config.damageModifier || 0
+    this.contactDamage = config.contactDamage || 0
     this.strength = config.strength || 0
     this.dexterity = config.dexterity || 0
     this.constitution = config.constitution || 0
@@ -79,6 +81,9 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   getHealth() {
     return this.health
   }
+  getMaxHealth() {
+    return this.maxHealth
+  }
   getRegen() {
     return this.regen
   }
@@ -100,8 +105,14 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   getCritChance() {
     return this.critChance
   }
+  getContactDamage() {
+		return this.contactDamage
+	}
 
   // Damage
+  resetHealth() {
+    this.health = this.maxHealth
+  }
   damageUnit(value: number) {
     this.health = clamp(this.health) - clamp(value)
   }
@@ -159,4 +170,5 @@ export interface UnitConfig {
   skill: number,
   critChance: number
   resistance: number,
+  contactDamage?: number
 }

@@ -12,7 +12,7 @@ export class Weapon extends Item {
   private damage: number = 0
   private cooldown: number = 0
   private ready: boolean = true
-  private bonusProjectiles: number
+  private projectiles: number
   private projectileSpeed: number = 0
   private rotationSpeed: number = 0
   private stability: number
@@ -34,7 +34,7 @@ export class Weapon extends Item {
     this.owner = owner
     this.damage = config.damage
     this.cooldown = config.cooldown
-    this.bonusProjectiles = config.bonusProjectiles || 0
+    this.projectiles = config.projectiles || 1
     this.projectileSpeed = config.projectileSpeed || 0
     this.rotationSpeed = config.rotationSpeed || 0
     this.stability = config.stability || 0
@@ -81,8 +81,8 @@ export class Weapon extends Item {
   getCooldown() {
     return this.cooldown
   }
-  getBonusProjectiles() {
-    return this.bonusProjectiles
+  getProjectiles() {
+    return this.projectiles
   }
   getProjectileSpeed() {
     return this.projectileSpeed * 100
@@ -154,7 +154,7 @@ export interface WeaponConfig {
     spriteSheet: string,
     damage: number,
     cooldown: number,
-    bonusProjectiles?: number,
+    projectiles?: number,
     projectileSpeed?: number,
     rotationSpeed?: number,
     stability?: number,
@@ -174,13 +174,12 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_katana',
     spriteSheet: 'effects_slash',
     damage: 4,
-    cooldown: 1000,
-    angle: 0,
+    cooldown: 1500,
     cost: 100,
-    bonusProjectiles: 1,
     attackMethod: 'melee',
-    projectileSpeed: 2.5,
-    tags: ['reach']
+    projectiles: 2,
+    projectileSpeed: 2,
+    tags: ['speed', 'size']
   },
   {
     id: 'weapon_kanabo',
@@ -193,7 +192,7 @@ export const weaponList: Array<WeaponConfig> = [
     cooldown: 500,
     cost: 100,
     attackMethod: 'melee',
-    tags: ['area']
+    tags: ['size']
   },
   {
     id: 'weapon_shuriken',
@@ -202,7 +201,7 @@ export const weaponList: Array<WeaponConfig> = [
     icon: 'icon_shuriken',
     animation: 'attack_shuriken',
     spriteSheet: 'effects_shuriken',
-    damage: 1,
+    damage: 2,
     cooldown: 500,
     projectileSpeed: 4,
     rotationSpeed: 10,
@@ -220,12 +219,12 @@ export const weaponList: Array<WeaponConfig> = [
     animation: 'attack_yumi',
     spriteSheet: 'effects_arrow',
     damage: 2,
-    cooldown: 1000,
+    cooldown: 1500,
     projectileSpeed: 3,
     stability: 1,
     cost: 100,
     attackMethod: 'ranged',
-    tags: ['pierce']
+    tags: ['pierce', 'speed']
   },
   {
     id: 'weapon_naginata',
@@ -238,7 +237,7 @@ export const weaponList: Array<WeaponConfig> = [
     cooldown: 4000,
     angle: 180,
     cost: 100,
-    attackMethod: 'static',
+    attackMethod: 'melee',
     tags: ['area']
   },
   {

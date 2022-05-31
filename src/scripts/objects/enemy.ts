@@ -6,8 +6,10 @@ export class Enemy extends Unit {
 		const config = enemyList.find(entry => entry.id == id) as UnitConfig
 		super(scene, x, y, id, config)
 
-		this.setTarget(target!)	
+		this.setTarget(target!)
 	}
+
+
 
   update() {}
 }
@@ -35,6 +37,7 @@ export class EnemyPool extends Phaser.GameObjects.Group {
 		enemy.setVisible(true)
 		enemy.setInteractive()
 		enemy.body.enable = true
+		enemy.resetHealth()
 
 		return enemy
 
@@ -68,5 +71,6 @@ export const enemyList: Array<UnitConfig> = [
     constitution: 0,
     skill: 0,
     resistance: 0,
+		contactDamage: 1
 	}
 ]

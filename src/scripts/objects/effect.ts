@@ -54,7 +54,6 @@ export class EffectPool extends Phaser.GameObjects.Group {
 	}
 
 	spawn(spriteSheet: string, animation: string, owner: Weapon) {
-		const spawnExisting = this.countActive(false) > 0
 
     const effect = this.get(0, 0, spriteSheet)
     effect.animation = animation

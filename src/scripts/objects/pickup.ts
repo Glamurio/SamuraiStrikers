@@ -34,6 +34,8 @@ export class PickupPool extends Phaser.GameObjects.Group {
     pickup.setScale(2)
     pickup.setActive(true)
     pickup.setVisible(true)
+    pickup.setInteractive()
+		pickup.body.enable = true
 
     return pickup
 	}
@@ -41,6 +43,8 @@ export class PickupPool extends Phaser.GameObjects.Group {
 	despawn(pickup: Pickup) {
 		pickup.setActive(false)
 		pickup.setVisible(false)
+    pickup.removeInteractive()
+		pickup.body.enable = false
 	}
 
 }
